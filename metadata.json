@@ -1,0 +1,5 @@
+{
+  "name": "Chat with your PDF using Gemini",
+  "description": "An application that allows you to upload a PDF file and ask questions about its content using Google's Gemini API, demonstrating how to use AI Studio concepts to build a custom chatbot.",
+  "requestFramePermissions": []
+}
