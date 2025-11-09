@@ -333,13 +333,21 @@ io.on("connection", (socket) => {
     if (team) {
       team.score += points;
 
-      // Broadcast updated scores
+      // Also update the individual player's score (if we can find them by socket id)
+      const player = game.players.find((p) => p.id === socket.id);
+      if (player) {
+        if (!player.score) player.score = 0;
+        player.score += points;
+      }
+
+      // Broadcast updated scores including per-player scores so clients can render leaderboards
       io.to(gameId).emit("scores-updated", {
         teams: game.teams.map((t, idx) => ({
           name: t.name,
           index: idx,
           score: t.score,
-          playerCount: t.players.length
+          playerCount: t.players.length,
+          players: t.players.map(p => ({ name: p.name, score: p.score || 0 }))
         }))
       });
     }
