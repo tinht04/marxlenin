@@ -5,10 +5,12 @@ import react from "@vitejs/plugin-react";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, ".", "");
   const apiUrl = env.VITE_API_URL || "http://localhost:3001";
+  // Determine dev port: prefer VITE_DEV_PORT, then PORT, then default 3000
+  const devPort = Number(env.VITE_DEV_PORT || env.PORT) || 3000;
   
   return {
     server: {
-      port: 3000,
+      port: devPort,
       host: "0.0.0.0",
       proxy: {
         // Proxy API requests during local dev to Express backend

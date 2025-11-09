@@ -23,13 +23,14 @@ GEMINI_API_KEY=your_production_key
 VITE_SHEET_APPEND_URL=https://script.google.com/macros/s/YOUR_ID/exec
 PORT=3002
 
-# Nếu deploy lên Vercel/Netlify - dùng relative URLs
+# Nếu deploy lên Vercel/Netlify - dùng relative URLs (khi FE + BE trên cùng domain)
+# Với production URL của bạn (Vercel): https://marxlenin.vercel.app
 VITE_API_URL=/api
-VITE_SOCKET_URL=wss://your-app.vercel.app
+VITE_SOCKET_URL=https://marxlenin.vercel.app
 
-# Hoặc nếu frontend và backend cùng domain
-VITE_API_URL=https://your-app.vercel.app/api
-VITE_SOCKET_URL=https://your-app.vercel.app
+# Hoặc dùng tuyệt đối nếu cần:
+# VITE_API_URL=https://marxlenin.vercel.app/api
+# VITE_SOCKET_URL=https://marxlenin.vercel.app
 ```
 
 ## 🔧 Kiến Trúc Project
