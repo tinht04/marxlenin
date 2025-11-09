@@ -190,7 +190,8 @@ const App: React.FC = () => {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col bg-gray-50 text-gray-800 font-sans">
+      <div className="min-h-screen flex flex-col dongson-background-light text-gray-800 font-sans">
+        <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Header hasPdf={!!pdfFile} />
         <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Routes>
@@ -229,6 +230,7 @@ const App: React.FC = () => {
           </Routes>
         </main>
         <Footer />
+        </div>
       </div>
     </BrowserRouter>
   );

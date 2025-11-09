@@ -73,27 +73,47 @@ const FTATimeline: React.FC = () => {
     <div
       style={{
         minHeight: "100%",
-        background: "#0f172a",
+        background: "linear-gradient(135deg, #f5e6d3 0%, #faf8f3 50%, #f5e6d3 100%)",
         padding: "40px 20px",
         fontFamily:
           "'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
+        position: "relative",
       }}
     >
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+      {/* Dong Son Drum Background */}
+      <div style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundImage: "url('/img/dongson-drum.png')",
+        backgroundSize: "1200px 1200px",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        opacity: 0.08,
+        pointerEvents: "none",
+        zIndex: 0,
+      }} />
+      
+      <div style={{ maxWidth: 1200, margin: "0 auto", position: "relative", zIndex: 1 }}>
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <h1
             style={{
               fontSize: 42,
-              fontWeight: 700,
-              color: "#fff",
+              fontWeight: 800,
+              background: "linear-gradient(135deg, #b8860b 0%, #d4a574 50%, #cd7f32 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
               marginBottom: 8,
               letterSpacing: "-1px",
             }}
           >
             Vietnam FTA Timeline
           </h1>
-          <p style={{ color: "#94a3b8", fontSize: 16 }}>
+          <p style={{ color: "#8b5a00", fontSize: 16, fontWeight: 600 }}>
             Các Hiệp Định Thương Mại Tự Do
           </p>
         </div>
@@ -111,26 +131,28 @@ const FTATimeline: React.FC = () => {
               value={filterTopic}
               onChange={(e) => setFilterTopic(e.target.value)}
               style={{
-                background: "#1e293b",
-                border: "2px solid #334155",
+                background: "linear-gradient(135deg, #fff9f0, #ffffff)",
+                border: "2px solid #d4a574",
                 borderRadius: 12,
                 padding: "14px 48px 14px 24px",
                 fontSize: 16,
-                color: "#fff",
+                color: "#8b5a00",
+                fontWeight: 600,
                 outline: "none",
                 cursor: "pointer",
                 appearance: "none",
                 minWidth: 250,
                 transition: "all 0.3s ease",
+                boxShadow: "0 4px 12px rgba(184, 134, 11, 0.1)",
               }}
-              onFocus={(e) => (e.target.style.borderColor = "#3b82f6")}
-              onBlur={(e) => (e.target.style.borderColor = "#334155")}
+              onFocus={(e) => (e.target.style.borderColor = "#b8860b")}
+              onBlur={(e) => (e.target.style.borderColor = "#d4a574")}
             >
               {topics.map((topic) => (
                 <option
                   key={topic}
                   value={topic}
-                  style={{ background: "#1e293b" }}
+                  style={{ background: "#fff9f0", color: "#8b5a00" }}
                 >
                   {topic === "All" ? "📋 Tất cả" : `📁 ${topic}`}
                 </option>
@@ -142,7 +164,7 @@ const FTATimeline: React.FC = () => {
                 right: 20,
                 top: "50%",
                 transform: "translateY(-50%)",
-                color: "#64748b",
+                color: "#b8860b",
                 pointerEvents: "none",
                 fontSize: 12,
               }}
@@ -157,9 +179,10 @@ const FTATimeline: React.FC = () => {
           <div
             style={{
               textAlign: "center",
-              color: "#64748b",
+              color: "#8b5a00",
               fontSize: 18,
               marginTop: 80,
+              fontWeight: 600,
             }}
           >
             Không tìm thấy FTA nào
@@ -172,11 +195,13 @@ const FTATimeline: React.FC = () => {
                 position: "absolute",
                 top: 80,
                 left: "50%",
-                width: 2,
+                width: 4,
                 height: "calc(100% - 80px)",
                 background:
-                  "linear-gradient(180deg, #334155 0%, #334155 90%, transparent 100%)",
+                  "linear-gradient(180deg, #b8860b 0%, #d4a574 50%, #cd7f32 90%, transparent 100%)",
                 transform: "translateX(-50%)",
+                borderRadius: 2,
+                boxShadow: "0 0 8px rgba(184, 134, 11, 0.3)",
               }}
             />
 
@@ -204,12 +229,12 @@ const FTATimeline: React.FC = () => {
                       style={{
                         width: "45%",
                         minWidth: 300,
-                        background: "#1e293b",
+                        background: "linear-gradient(135deg, #fff9f0, #ffffff)",
                         borderRadius: 16,
                         padding: 24,
                         cursor: "pointer",
-                        boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-                        border: "1px solid #334155",
+                        boxShadow: "0 10px 30px rgba(184, 134, 11, 0.2)",
+                        border: "2px solid #d4a574",
                         position: "relative",
                       }}
                     >
@@ -220,15 +245,13 @@ const FTATimeline: React.FC = () => {
                           top: -15,
                           right: isLeft ? "auto" : 24,
                           left: isLeft ? 24 : "auto",
-                          background: colors[idx % colors.length],
+                          background: "linear-gradient(135deg, #d4a574, #b8860b)",
                           color: "#fff",
                           padding: "8px 20px",
                           borderRadius: 20,
                           fontSize: 14,
                           fontWeight: 700,
-                          boxShadow: `0 4px 15px ${
-                            colors[idx % colors.length]
-                          }40`,
+                          boxShadow: "0 4px 12px rgba(184, 134, 11, 0.3)",
                         }}
                       >
                         {getYear(fta.Signing_Date)}
@@ -236,7 +259,7 @@ const FTATimeline: React.FC = () => {
 
                       <h3
                         style={{
-                          color: "#fff",
+                          color: "#8b5a00",
                           fontSize: 20,
                           fontWeight: 700,
                           marginTop: 20,
@@ -248,7 +271,7 @@ const FTATimeline: React.FC = () => {
 
                       <p
                         style={{
-                          color: "#94a3b8",
+                          color: "#8b5a00",
                           fontSize: 14,
                           lineHeight: 1.6,
                           marginBottom: 16,
@@ -267,11 +290,13 @@ const FTATimeline: React.FC = () => {
                         {fta.Topic && (
                           <span
                             style={{
-                              background: "#334155",
-                              color: "#94a3b8",
+                              background: "linear-gradient(135deg, #ffe0b2, #ffecb3)",
+                              color: "#8b5a00",
                               padding: "4px 12px",
                               borderRadius: 6,
                               fontSize: 12,
+                              fontWeight: 600,
+                              border: "1px solid #d4a574",
                             }}
                           >
                             {fta.Topic}
@@ -281,14 +306,15 @@ const FTATimeline: React.FC = () => {
                           style={{
                             background:
                               fta.Status === "Active"
-                                ? "#10b98140"
-                                : "#f59e0b40",
+                                ? "linear-gradient(135deg, #d4f4dd, #c6f6d5)"
+                                : "linear-gradient(135deg, #fed7aa, #fde68a)",
                             color:
-                              fta.Status === "Active" ? "#10b981" : "#f59e0b",
+                              fta.Status === "Active" ? "#065f46" : "#92400e",
                             padding: "4px 12px",
                             borderRadius: 6,
                             fontSize: 12,
                             fontWeight: 600,
+                            border: fta.Status === "Active" ? "1px solid #6ee7b7" : "1px solid #fbbf24",
                           }}
                         >
                           {fta.Status}
@@ -306,11 +332,9 @@ const FTATimeline: React.FC = () => {
                         width: 16,
                         height: 16,
                         borderRadius: "50%",
-                        background: colors[idx % colors.length],
-                        border: "4px solid #0f172a",
-                        boxShadow: `0 0 0 4px #334155, 0 4px 15px ${
-                          colors[idx % colors.length]
-                        }60`,
+                        background: "linear-gradient(135deg, #d4a574, #b8860b)",
+                        border: "4px solid #f5e6d3",
+                        boxShadow: "0 0 0 4px #d4a574, 0 4px 15px rgba(184, 134, 11, 0.5)",
                         zIndex: 10,
                       }}
                     />
@@ -338,7 +362,7 @@ const FTATimeline: React.FC = () => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: "rgba(0, 0, 0, 0.8)",
+                background: "rgba(139, 90, 0, 0.7)",
                 backdropFilter: "blur(8px)",
                 zIndex: 999,
                 display: "flex",
@@ -354,14 +378,14 @@ const FTATimeline: React.FC = () => {
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                  background: "#1e293b",
+                  background: "linear-gradient(135deg, #fff9f0, #ffffff)",
                   borderRadius: 24,
                   width: "100%",
                   maxWidth: 700,
                   maxHeight: "90vh",
                   overflow: "hidden",
-                  boxShadow: "0 25px 50px rgba(0, 0, 0, 0.5)",
-                  border: "1px solid #334155",
+                  boxShadow: "0 25px 50px rgba(184, 134, 11, 0.4)",
+                  border: "2px solid #d4a574",
                   display: "flex",
                   flexDirection: "column",
                 }}
@@ -370,7 +394,7 @@ const FTATimeline: React.FC = () => {
                 <div
                   style={{
                     padding: "32px 32px 24px",
-                    borderBottom: "1px solid #334155",
+                    borderBottom: "2px solid #d4a574",
                     position: "relative",
                   }}
                 >
@@ -380,8 +404,8 @@ const FTATimeline: React.FC = () => {
                       position: "absolute",
                       top: 24,
                       right: 24,
-                      background: "#334155",
-                      border: "none",
+                      background: "linear-gradient(135deg, #ffe0b2, #ffecb3)",
+                      border: "1px solid #d4a574",
                       borderRadius: 8,
                       width: 36,
                       height: 36,
@@ -389,17 +413,18 @@ const FTATimeline: React.FC = () => {
                       alignItems: "center",
                       justifyContent: "center",
                       cursor: "pointer",
-                      color: "#94a3b8",
+                      color: "#8b5a00",
                       fontSize: 20,
                       transition: "all 0.2s",
+                      fontWeight: 700,
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#475569";
+                      e.currentTarget.style.background = "linear-gradient(135deg, #d4a574, #b8860b)";
                       e.currentTarget.style.color = "#fff";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#334155";
-                      e.currentTarget.style.color = "#94a3b8";
+                      e.currentTarget.style.background = "linear-gradient(135deg, #ffe0b2, #ffecb3)";
+                      e.currentTarget.style.color = "#8b5a00";
                     }}
                   >
                     ✕
@@ -407,7 +432,7 @@ const FTATimeline: React.FC = () => {
 
                   <h2
                     style={{
-                      color: "#fff",
+                      color: "#8b5a00",
                       fontSize: 28,
                       fontWeight: 700,
                       marginBottom: 8,
@@ -427,16 +452,17 @@ const FTATimeline: React.FC = () => {
                       style={{
                         background:
                           selectedFTA.Status === "Active"
-                            ? "#10b98140"
-                            : "#f59e0b40",
+                            ? "linear-gradient(135deg, #d4f4dd, #c6f6d5)"
+                            : "linear-gradient(135deg, #fed7aa, #fde68a)",
                         color:
                           selectedFTA.Status === "Active"
-                            ? "#10b981"
-                            : "#f59e0b",
+                            ? "#065f46"
+                            : "#92400e",
                         padding: "4px 12px",
                         borderRadius: 6,
                         fontSize: 13,
                         fontWeight: 600,
+                        border: selectedFTA.Status === "Active" ? "1px solid #6ee7b7" : "1px solid #fbbf24",
                       }}
                     >
                       {selectedFTA.Status}
@@ -444,11 +470,13 @@ const FTATimeline: React.FC = () => {
                     {selectedFTA.Topic && (
                       <span
                         style={{
-                          background: "#334155",
-                          color: "#94a3b8",
+                          background: "linear-gradient(135deg, #ffe0b2, #ffecb3)",
+                          color: "#8b5a00",
                           padding: "4px 12px",
                           borderRadius: 6,
                           fontSize: 13,
+                          fontWeight: 600,
+                          border: "1px solid #d4a574",
                         }}
                       >
                         {selectedFTA.Topic}
@@ -503,17 +531,17 @@ const FTATimeline: React.FC = () => {
                           <div
                             key={i}
                             style={{
-                              background: "#0f172a",
+                              background: "linear-gradient(135deg, #fffaf0, #fff9f0)",
                               padding: 20,
                               borderRadius: 12,
-                              border: "1px solid #334155",
+                              border: "2px solid #d4a574",
                             }}
                           >
                             <div
                               style={{
-                                color: "#64748b",
+                                color: "#8b5a00",
                                 fontSize: 13,
-                                fontWeight: 600,
+                                fontWeight: 700,
                                 marginBottom: 8,
                                 textTransform: "uppercase",
                                 letterSpacing: "0.5px",
@@ -523,7 +551,7 @@ const FTATimeline: React.FC = () => {
                             </div>
                             <div
                               style={{
-                                color: "#e2e8f0",
+                                color: "#8b5a00",
                                 fontSize: 15,
                                 lineHeight: 1.6,
                               }}
@@ -542,7 +570,7 @@ const FTATimeline: React.FC = () => {
                         style={{
                           display: "block",
                           background:
-                            "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                            "linear-gradient(135deg, #d4a574 0%, #b8860b 100%)",
                           color: "#fff",
                           padding: 16,
                           borderRadius: 12,
@@ -550,18 +578,19 @@ const FTATimeline: React.FC = () => {
                           textDecoration: "none",
                           fontWeight: 600,
                           fontSize: 15,
+                          border: "2px solid #cd7f32",
+                          boxShadow: "0 4px 12px rgba(184, 134, 11, 0.3)",
                           transition: "all 0.3s",
-                          boxShadow: "0 4px 15px rgba(59, 130, 246, 0.3)",
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.transform = "translateY(-2px)";
                           e.currentTarget.style.boxShadow =
-                            "0 6px 20px rgba(59, 130, 246, 0.4)";
+                            "0 6px 20px rgba(184, 134, 11, 0.5)";
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.transform = "translateY(0)";
                           e.currentTarget.style.boxShadow =
-                            "0 4px 15px rgba(59, 130, 246, 0.3)";
+                            "0 4px 12px rgba(184, 134, 11, 0.3)";
                         }}
                       >
                         🔗 Xem nguồn tham khảo

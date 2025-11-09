@@ -9,20 +9,39 @@ export const Header: React.FC<HeaderProps> = ({ hasPdf }) => {
   const location = useLocation();
   const navItemClasses =
     "py-4 px-1 border-b-2 font-medium text-sm transition-colors";
-  const activeClasses = "border-blue-600 text-blue-600";
+  const activeClasses = "border-amber-600 text-amber-700 bg-amber-50/50";
   const inactiveClasses =
-    "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300";
+    "border-transparent text-gray-600 hover:text-amber-700 hover:border-amber-400 hover:bg-amber-50/30";
   const disabledClasses = "text-gray-300 cursor-not-allowed";
   // Upload tab has been removed: PDF is preloaded into the app and users
   // should not upload files via the UI.
 
   return (
-    <header className="bg-white shadow-sm">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 shadow-md border-b-4 border-amber-600 relative overflow-hidden">
+      {/* Decorative border pattern - top */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-600 to-transparent"></div>
+      
+      {/* Decorative circles - Dong Son style */}
+      <div className="absolute top-2 left-4 w-8 h-8 border-2 border-amber-400 rounded-full opacity-30"></div>
+      <div className="absolute top-2 left-6 w-4 h-4 border border-amber-500 rounded-full opacity-40"></div>
+      <div className="absolute top-2 right-4 w-8 h-8 border-2 border-amber-400 rounded-full opacity-30"></div>
+      <div className="absolute top-2 right-6 w-4 h-4 border border-amber-500 rounded-full opacity-40"></div>
+      
+      {/* Geometric patterns */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 opacity-50"></div>
+      
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex justify-between items-center py-4">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
-            MarxLeninEdu
-          </h1>
+          <div className="flex items-center gap-3">
+            <img 
+              src="/img/logo.png" 
+              alt="MarxLeninEdu Logo" 
+              className="h-12 w-12 object-contain"
+            />
+            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-800 via-orange-700 to-amber-800 bg-clip-text text-transparent tracking-tight">
+              MarxLeninEdu
+            </h1>
+          </div>
         </div>
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
           <Link

@@ -811,7 +811,7 @@ export const MultiplayerGame: React.FC = () => {
   const renderHome = () => (
     <div className="multiplayer-home">
       <div className="hero-section">
-        <h1 className="game-title">🌍 Hội Nhập Kinh Tế Quiz</h1>
+        <h1 className="game-title">Hội Nhập Kinh Tế Quiz</h1>
         <p className="game-subtitle">Thi đua theo nhóm - Realtime</p>
       </div>
 
@@ -945,7 +945,7 @@ export const MultiplayerGame: React.FC = () => {
         </div>
 
         <div className="join-info">
-          <p>💡 Bạn sẽ được tự động phân vào nhóm khi game bắt đầu</p>
+          <p>Bạn sẽ được tự động phân vào nhóm khi game bắt đầu</p>
         </div>
 
         <button onClick={joinGame} className="primary-button">
@@ -1004,7 +1004,7 @@ export const MultiplayerGame: React.FC = () => {
         </div>
 
         <div className="lobby-info">
-          <p>💡 Khi bắt đầu, tất cả người chơi sẽ được phân ngẫu nhiên vào {gameState.settings.teamCount} nhóm</p>
+          <p>Khi bắt đầu, tất cả người chơi sẽ được phân ngẫu nhiên vào {gameState.settings.teamCount} nhóm</p>
         </div>
 
         <div className="lobby-actions">
@@ -1358,9 +1358,31 @@ export const MultiplayerGame: React.FC = () => {
       <style>{`
         .multiplayer-game {
           min-height: 100vh;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #f5e6d3 0%, #faf8f3 50%, #f5e6d3 100%);
+          position: relative;
           padding: 2rem;
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .multiplayer-game::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-image: url('/img/dongson-drum.png');
+          background-size: contain;
+          background-position: center;
+          background-repeat: no-repeat;
+          opacity: 0.04;
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .multiplayer-game > * {
+          position: relative;
+          z-index: 1;
         }
 
         .multiplayer-home {
@@ -1370,19 +1392,25 @@ export const MultiplayerGame: React.FC = () => {
 
         .hero-section {
           text-align: center;
-          color: white;
+          color: #8b5a00;
           margin-bottom: 4rem;
         }
 
         .game-title {
           font-size: 4rem;
+          font-weight: bold;
           margin-bottom: 1rem;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+          background: linear-gradient(135deg, #b8860b, #cd7f32, #b8860b);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          text-shadow: none;
           animation: fadeInDown 0.8s ease;
         }
 
         .game-subtitle {
           font-size: 1.5rem;
+          color: #a0662f;
           opacity: 0.9;
           animation: fadeInUp 0.8s ease;
         }
@@ -1396,18 +1424,21 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .action-card {
-          background: white;
+          background: linear-gradient(135deg, #fff9f0 0%, #ffffff 100%);
+          border: 3px solid #d4a574;
           border-radius: 20px;
           padding: 3rem 2rem;
           text-align: center;
           cursor: pointer;
           transition: all 0.3s ease;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+          box-shadow: 0 10px 30px rgba(184, 134, 11, 0.2);
         }
 
         .action-card:hover {
           transform: translateY(-10px) scale(1.02);
-          box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+          box-shadow: 0 15px 40px rgba(184, 134, 11, 0.3);
+          border-color: #b8860b;
+          background: linear-gradient(135deg, #fffef9 0%, #fff9f0 100%);
         }
 
         .action-card:active {
@@ -1425,7 +1456,7 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .action-card h3 {
-          color: #667eea;
+          color: #b8860b;
           margin-bottom: 0.5rem;
           font-size: 1.8rem;
         }
@@ -1502,7 +1533,7 @@ export const MultiplayerGame: React.FC = () => {
 
         .primary-button {
           width: 100%;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #d4a574 0%, #b8860b 100%);
           color: white;
           border: none;
           padding: 1rem 2rem;
@@ -1511,12 +1542,13 @@ export const MultiplayerGame: React.FC = () => {
           font-size: 1.1rem;
           font-weight: bold;
           transition: all 0.3s ease;
-          box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 5px 15px rgba(184, 134, 11, 0.4);
         }
 
         .primary-button:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+          box-shadow: 0 8px 20px rgba(184, 134, 11, 0.6);
+          background: linear-gradient(135deg, #e0b380 0%, #cd7f32 100%);
         }
 
         .primary-button:disabled {
@@ -1592,7 +1624,7 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .code-value {
-          background: #667eea;
+          background: #b8860b;
           color: white;
           padding: 0.8rem 1.5rem;
           border-radius: 10px;
@@ -1740,7 +1772,7 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .team-score {
-          background: #667eea;
+          background: #b8860b;
           color: white;
           padding: 0.3rem 0.8rem;
           border-radius: 20px;
@@ -1819,7 +1851,7 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .option-letter {
-          background: #667eea;
+          background: #b8860b;
           color: white;
           width: 40px;
           height: 40px;
@@ -1873,7 +1905,7 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .next-question-button {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #d4a574 0%, #b8860b 100%);
           color: white;
           border: none;
           padding: 1rem 2.5rem;
@@ -2043,7 +2075,7 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .ranking-item .team-score {
-          background: #667eea;
+          background: #b8860b;
           color: white;
           padding: 0.5rem 1rem;
           border-radius: 20px;
@@ -2399,7 +2431,7 @@ export const MultiplayerGame: React.FC = () => {
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #667eea;
+          background: #b8860b;
           cursor: pointer;
         }
 
@@ -2407,7 +2439,7 @@ export const MultiplayerGame: React.FC = () => {
           width: 20px;
           height: 20px;
           border-radius: 50%;
-          background: #667eea;
+          background: #b8860b;
           cursor: pointer;
           border: none;
         }
@@ -2444,16 +2476,18 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .join-info {
-          background: #e8f5e9;
-          padding: 1rem;
+          background: #fff3e0;
+          padding: 1.2rem;
           border-radius: 10px;
-          border-left: 4px solid #4caf50;
+          border-left: 4px solid #b8860b;
           margin: 1rem 0;
         }
 
         .join-info p {
           margin: 0;
-          color: #2e7d32;
+          color: #8b5a00;
+          font-weight: 600;
+          font-size: 1.05rem;
         }
 
         .lobby-stats {
@@ -2536,12 +2570,19 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .lobby-info {
-          background: rgba(255,255,255,0.2);
-          padding: 1rem;
+          background: #fff3e0;
+          padding: 1.2rem;
           border-radius: 10px;
+          border-left: 4px solid #b8860b;
           text-align: center;
-          color: white;
           margin-bottom: 1rem;
+        }
+
+        .lobby-info p {
+          margin: 0;
+          color: #8b5a00;
+          font-weight: 600;
+          font-size: 1.05rem;
         }
 
         /* Host View Styles */
@@ -2567,7 +2608,7 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .question-counter {
-          background: #667eea;
+          background: #b8860b;
           color: white;
           padding: 0.8rem 1.5rem;
           border-radius: 10px;
@@ -2694,11 +2735,11 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .my-final-score .score-card {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #d4a574 0%, #b8860b 100%);
           color: white;
           padding: 2rem 4rem;
           border-radius: 20px;
-          box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+          box-shadow: 0 10px 30px rgba(184, 134, 11, 0.4);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -2716,7 +2757,7 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .my-team-highlight {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          background: linear-gradient(135deg, #d4a574 0%, #b8860b 100%) !important;
           color: white !important;
         }
 
@@ -2868,7 +2909,7 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .mini-score-item.my-team {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #d4a574 0%, #b8860b 100%);
           color: white;
         }
 

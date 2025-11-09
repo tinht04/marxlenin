@@ -178,9 +178,9 @@ export const IntegrationMap: React.FC = () => {
   return (
     <div className="space-y-4">
       {/* Bộ lọc */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 p-4 rounded-xl shadow-md border-2 border-amber-200 grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-semibold text-amber-900">
             Mức độ hợp tác
           </label>
           <select
@@ -188,7 +188,7 @@ export const IntegrationMap: React.FC = () => {
             onChange={(e) =>
               setFilters((f) => ({ ...f, partnership: e.target.value }))
             }
-            className="mt-1 block w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            className="mt-1 block w-full rounded-lg border-2 border-amber-300 bg-white focus:ring-amber-500 focus:border-amber-600 sm:text-sm font-medium text-gray-700 px-3 py-2"
           >
             <option value="all">Tất cả</option>
             {partnershipLevels.map((lvl) => (
@@ -197,7 +197,7 @@ export const IntegrationMap: React.FC = () => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-semibold text-amber-900">
             Khu vực
           </label>
           <select
@@ -205,7 +205,7 @@ export const IntegrationMap: React.FC = () => {
             onChange={(e) =>
               setFilters((f) => ({ ...f, region: e.target.value }))
             }
-            className="mt-1 block w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            className="mt-1 block w-full rounded-lg border-2 border-amber-300 bg-white focus:ring-amber-500 focus:border-amber-600 sm:text-sm font-medium text-gray-700 px-3 py-2"
           >
             <option value="all">Tất cả</option>
             {regions.map((r) => (
@@ -214,13 +214,13 @@ export const IntegrationMap: React.FC = () => {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-semibold text-amber-900">
             Tình trạng FTA
           </label>
           <select
             value={filters.fta}
             onChange={(e) => setFilters((f) => ({ ...f, fta: e.target.value }))}
-            className="mt-1 block w-full rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            className="mt-1 block w-full rounded-lg border-2 border-amber-300 bg-white focus:ring-amber-500 focus:border-amber-600 sm:text-sm font-medium text-gray-700 px-3 py-2"
           >
             <option value="all">Tất cả</option>
             {ftaStatuses.map((s) => (
@@ -244,17 +244,30 @@ export const IntegrationMap: React.FC = () => {
       </div>
 
       {/* Bản đồ */}
-      <div className="h-[70vh] w-full rounded-xl overflow-hidden shadow-lg border">
+      <div className="h-[70vh] w-full rounded-xl overflow-hidden shadow-lg border relative">
         <MapContainer
           center={[16, 106]}
           zoom={5}
+          minZoom={2}
+          maxZoom={18}
           scrollWheelZoom
           style={{ height: "100%", width: "100%" }}
           ref={mapRef}
+          worldCopyJump={true}
+          maxBounds={[[-90, -180], [90, 180]]}
+          preferCanvas={true}
         >
+          {/* OpenStreetMap - Nhanh, ổn định */}
           <TileLayer
-            attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>'
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            subdomains={['a', 'b', 'c']}
+            maxZoom={19}
+            minZoom={2}
+            noWrap={true}
+            updateWhenIdle={false}
+            updateWhenZooming={false}
+            keepBuffer={2}
           />
 
           {/* Hoàng Sa */}

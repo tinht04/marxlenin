@@ -1,0 +1,48 @@
+/* Dong Son Drum Pattern Background */
+.dongson-background {
+  background-color: #faf8f3;
+  background-image: url('/img/dongson-drum.png');
+  background-attachment: fixed;
+  background-size: 1000px 1000px;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 1;
+}
+
+.dongson-background::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/img/dongson-drum.png');
+  background-size: 1000px 1000px;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Alternative: Lighter version for better readability */
+.dongson-background-light {
+  background-color: #fdfcfa;
+  position: relative;
+}
+
+.dongson-background-light::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/img/dongson-drum.png');
+  background-size: 1200px 1200px;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 0;
+}

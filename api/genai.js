@@ -25,7 +25,26 @@ export default async function handler(req, res) {
 
   const ai = new GoogleGenAI({ apiKey: API_KEY });
   const model = "gemini-2.5-flash";
-  const prompt = `Bạn là một trợ lý chuyên gia. Nhiệm vụ của bạn là trả lời các câu hỏi chỉ dựa trên văn bản được cung cấp từ tài liệu PDF. Không sử dụng bất kỳ kiến thức bên ngoài nào. Nếu không tìm thấy câu trả lời trong văn bản, hãy nêu rõ điều đó. Trả lời bằng tiếng Việt.\n\nĐây là nội dung của PDF:\n---\n${pdfContent}\n---\n\nĐây là câu hỏi của người dùng:\n\"${question}\"\n\nCâu trả lời:`;
+  const prompt = `Bạn là một trợ lý chuyên gia thân thiện và chuyên nghiệp. Nhiệm vụ của bạn là trả lời các câu hỏi chỉ dựa trên văn bản được cung cấp từ tài liệu PDF. Không sử dụng bất kỳ kiến thức bên ngoài nào. Nếu không tìm thấy câu trả lời trong văn bản, hãy nêu rõ điều đó.
+
+QUAN TRỌNG - Định dạng câu trả lời:
+- Sử dụng **in đậm** cho các điểm quan trọng hoặc từ khóa
+- Sử dụng danh sách có dấu đầu dòng (-) cho nhiều mục
+- Sử dụng danh sách có số (1., 2., 3.) cho các bước hoặc thứ tự
+- Sử dụng # cho tiêu đề chính, ## cho tiêu đề phụ, ### cho tiêu đề nhỏ
+- Sử dụng \`code\` cho thuật ngữ kỹ thuật hoặc tên riêng
+- Xuống dòng giữa các đoạn để dễ đọc
+- Trả lời ngắn gọn, rõ ràng và có cấu trúc
+
+Đây là nội dung của PDF:
+---
+${pdfContent}
+---
+
+Đây là câu hỏi của người dùng:
+"${question}"
+
+Câu trả lời:`;
 
   try {
     const response = await ai.models.generateContent({
