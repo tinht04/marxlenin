@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Papa from "papaparse";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -25,6 +25,9 @@ const FTATimeline: React.FC = () => {
   const [selectedFTA, setSelectedFTA] = useState<FTARecord | null>(null);
   const [filterTopic, setFilterTopic] = useState<string>("All");
   const [topics, setTopics] = useState<string[]>([]);
+  const [videoPlaying, setVideoPlaying] = useState(true);
+  const [videoOpacity, setVideoOpacity] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const colors = [
     "#FF6B6B",
@@ -62,6 +65,58 @@ const FTATimeline: React.FC = () => {
         console.error("Error parsing CSV:", err);
       },
     });
+  }, []);
+
+  // Video fade in/out effect
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Fade in video when component mounts (slower)
+    setTimeout(() => setVideoOpacity(1), 100);
+
+    const handleLoadedMetadata = () => {
+      video.volume = 0;
+    };
+
+    const handleTimeUpdate = () => {
+      const currentTime = video.currentTime;
+      const duration = video.duration;
+
+      // Fade in audio in first 4 seconds with smooth curve
+      if (currentTime < 4) {
+        // Ease-in curve for smoother fade
+        const progress = currentTime / 4;
+        video.volume = Math.pow(progress, 0.5); // Square root for gentler fade-in
+      } else if (duration - currentTime < 4) {
+        // Fade out audio in last 4 seconds with smooth curve
+        const progress = (duration - currentTime) / 4;
+        video.volume = Math.pow(progress, 0.5); // Square root for gentler fade-out
+      } else {
+        video.volume = 1;
+      }
+    };
+
+    const handleEnded = () => {
+      // Fade out video
+      setVideoOpacity(0);
+      setTimeout(() => {
+        setVideoPlaying(false);
+      }, 300); // Match the CSS transition time (0.3s)
+    };
+
+    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('ended', handleEnded);
+    
+    // Auto play video
+    video.play().catch(err => console.log('Auto-play prevented:', err));
+
+    return () => {
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('ended', handleEnded);
+    };
   }, []);
 
   const filteredList =
@@ -174,21 +229,70 @@ const FTATimeline: React.FC = () => {
           </div>
         </div>
 
-        {/* Timeline */}
-        {filteredList.length === 0 ? (
+        {/* Video Section - Below Filter */}
+        {videoPlaying && (
           <div
             style={{
-              textAlign: "center",
-              color: "#8b5a00",
-              fontSize: 18,
-              marginTop: 80,
-              fontWeight: 600,
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: 60,
+              marginTop: 20,
+              opacity: videoOpacity,
+              transition: "opacity 0.3s ease-in-out",
             }}
           >
-            Không tìm thấy FTA nào
+            {/* Video container */}
+            <div
+              style={{
+                position: "relative",
+                width: "min(600px, 90vw)",
+                aspectRatio: "16/9",
+                transition: "transform 0.3s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+            >
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: 20,
+                  boxShadow: "0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 8px rgba(184, 134, 11, 0.3), 0 0 100px rgba(184, 134, 11, 0.2)",
+                  border: "4px solid #d4a574",
+                }}
+              >
+                <source src="/video/yeu-nuoc.mp4" type="video/mp4" />
+                Trình duyệt của bạn không hỗ trợ video.
+              </video>
+            </div>
           </div>
-        ) : (
-          <div style={{ position: "relative" }}>
+        )}
+
+        {/* Timeline - Only show after video ends */}
+        {!videoPlaying && (
+          <>
+            {filteredList.length === 0 ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  color: "#8b5a00",
+                  fontSize: 18,
+                  marginTop: 80,
+                  fontWeight: 600,
+                }}
+              >
+                Không tìm thấy FTA nào
+              </div>
+            ) : (
+              <div style={{ position: "relative" }}>
             {/* Timeline line */}
             <div
               style={{
@@ -343,6 +447,8 @@ const FTATimeline: React.FC = () => {
               })}
             </div>
           </div>
+            )}
+          </>
         )}
       </div>
 
