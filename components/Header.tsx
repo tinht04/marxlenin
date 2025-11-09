@@ -1,18 +1,12 @@
 import React from "react";
-
-type ViewType = "upload" | "chat" | "map" | "quiz";
+import { Link, useLocation } from "react-router-dom";
 
 interface HeaderProps {
-  currentView: ViewType;
-  setCurrentView: (view: ViewType) => void;
   hasPdf: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({
-  currentView,
-  setCurrentView,
-  hasPdf,
-}) => {
+export const Header: React.FC<HeaderProps> = ({ hasPdf }) => {
+  const location = useLocation();
   const navItemClasses =
     "py-4 px-1 border-b-2 font-medium text-sm transition-colors";
   const activeClasses = "border-blue-600 text-blue-600";
@@ -52,40 +46,54 @@ export const Header: React.FC<HeaderProps> = ({
           <Link
             to="/map"
             className={`${navItemClasses} ${
-              currentView === "map" ? activeClasses : inactiveClasses
+              location.pathname === "/map" ? activeClasses : inactiveClasses
             }`}
-            aria-current={currentView === "map" ? "page" : undefined}
+            aria-current={location.pathname === "/map" ? "page" : undefined}
           >
             Bản đồ Hội nhập
-          </button>
-          <button
-            onClick={() => setCurrentView("quiz")}
+          </Link>
+          <Link
+            to="/quiz"
             className={`${navItemClasses} ${
-              currentView === "quiz" ? activeClasses : inactiveClasses
+              location.pathname === "/quiz" ? activeClasses : inactiveClasses
             }`}
-            aria-current={currentView === "quiz" ? "page" : undefined}
+            aria-current={location.pathname === "/quiz" ? "page" : undefined}
           >
             Quizzz
-          </button>
-          {/* Upload tab removed */}
-          <button
-            onClick={() => {
-              if (hasPdf) {
-                setCurrentView("chat");
-              }
-            }}
-            disabled={!hasPdf}
+          </Link>
+          <Link
+            to="/fta"
             className={`${navItemClasses} ${
-              currentView === "chat"
+              location.pathname === "/fta" ? activeClasses : inactiveClasses
+            }`}
+            aria-current={location.pathname === "/fta" ? "page" : undefined}
+          >
+            FTA Timeline
+          </Link>
+          <Link
+            to={hasPdf ? "/chat" : "#"}
+            className={`${navItemClasses} ${
+              location.pathname === "/chat"
                 ? activeClasses
                 : hasPdf
                 ? inactiveClasses
                 : disabledClasses
             }`}
-            aria-current={currentView === "chat" ? "page" : undefined}
+            aria-current={location.pathname === "/chat" ? "page" : undefined}
+            tabIndex={hasPdf ? 0 : -1}
+            style={hasPdf ? {} : { pointerEvents: "none" }}
           >
             Chatbot
-          </button>
+          </Link>
+          <Link
+            to="/blog"
+            className={`${navItemClasses} ${
+              location.pathname === "/blog" ? activeClasses : inactiveClasses
+            }`}
+            aria-current={location.pathname === "/blog" ? "page" : undefined}
+          >
+            Blog
+          </Link>
         </nav>
       </div>
     </header>

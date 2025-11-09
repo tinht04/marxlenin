@@ -18,8 +18,4 @@ console.log(
 );
 
 // Do not log sensitive keys to the browser console.
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+root.render(<App />);

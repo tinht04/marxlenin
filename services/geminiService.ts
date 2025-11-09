@@ -45,7 +45,8 @@ export const answerFromPdf = async (
     const raw = await resp.text();
     try {
       const data = JSON.parse(raw);
-      return data.answer ?? data.text ?? String(raw ?? "");
+      // If the answer contains markdown, return as-is for rendering
+      return (data.answer ?? data.text ?? String(raw ?? "")).trim();
     } catch (err) {
       return raw;
     }

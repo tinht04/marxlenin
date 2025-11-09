@@ -33,9 +33,7 @@ const App: React.FC = () => {
     "idle" | "processing" | "ready" | "querying"
   >("idle");
   const [error, setError] = useState<string>("");
-  const [currentView, setCurrentView] = useState<
-    "upload" | "chat" | "map" | "quiz"
-  >("map");
+  // Remove currentView, use router
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load data from localStorage on initial render
@@ -93,7 +91,7 @@ const App: React.FC = () => {
               "Xin chào, tôi là trợ lý của MarxLeninEdu. Tôi giúp gì cho bạn?",
           },
         ]);
-        setCurrentView("chat");
+        // Navigation handled by router
       } catch (err) {
         console.error("Failed to load static PDF", err);
         // if static load fails, fall back to idle state
@@ -141,7 +139,7 @@ const App: React.FC = () => {
                 "Tài liệu PDF của bạn đã được xử lý. Bây giờ bạn có thể đặt câu hỏi về nội dung của nó.",
             },
           ]);
-          setCurrentView("chat"); // Switch to chat view on success
+          // Navigation handled by router
         } catch (err) {
           console.error(err);
           setError("Không thể đọc tệp PDF. Vui lòng thử một tệp khác.");
@@ -165,7 +163,7 @@ const App: React.FC = () => {
       fileInputRef.current.value = "";
     }
     localStorage.removeItem(LOCAL_STORAGE_KEY);
-    setCurrentView("upload"); // Go back to upload view
+    // Navigation handled by router
   }, []);
 
   const handleSubmitQuestion = async (question: string) => {
@@ -228,32 +226,11 @@ const App: React.FC = () => {
                 )
               }
             />
-          </div>
-        )}
-
-        {currentView === "chat" && pdfFile && (
-          <div>
-            <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-3 overflow-hidden">
-                <IconFile />
-                <span className="font-medium text-sm truncate">
-                  {pdfFile.name}
-                </span>
-              </div>
-              {/* Upload/remove UI removed — PDF is preloaded and cannot be swapped by users */}
-            </div>
-            <ChatWindow
-              status={status}
-              chatHistory={chatHistory}
-              onSubmitQuestion={handleSubmitQuestion}
-            />
-          </div>
-        )}
-        {currentView === "map" && <IntegrationMap />}
-        {currentView === "quiz" && <QuizView />}
-      </main>
-      <Footer />
-    </div>
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </BrowserRouter>
   );
 };
 

@@ -264,9 +264,6 @@ export const QuizView: React.FC = () => {
             <option value="20">20 câu</option>
             <option value="0">Tất cả</option>
           </select>
-          <p className="text-xs text-gray-500 mt-1">
-            Chọn 0 để sử dụng tất cả câu hỏi hợp lệ trong sheet.
-          </p>
         </div>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <button
