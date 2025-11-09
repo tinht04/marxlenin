@@ -562,9 +562,9 @@ const FTATimeline: React.FC = () => {
                         )
                     )}
 
-                    {selectedFTA.Source && (
+                    {selectedFTA.Link && (
                       <a
-                        href={selectedFTA.Source}
+                        href={selectedFTA.Link}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{
