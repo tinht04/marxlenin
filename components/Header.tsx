@@ -23,7 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   // should not upload files via the UI.
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-10">
+    <header className="bg-white shadow-sm">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
@@ -31,8 +31,26 @@ export const Header: React.FC<HeaderProps> = ({
           </h1>
         </div>
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-          <button
-            onClick={() => setCurrentView("map")}
+          <Link
+            to="/multiplayer-game"
+            className={`${navItemClasses} ${
+              location.pathname === "/multiplayer-game" ? activeClasses : inactiveClasses
+            }`}
+            aria-current={location.pathname === "/multiplayer-game" ? "page" : undefined}
+          >
+            Game Multiplayer
+          </Link>
+          <Link
+            to="/mini-games"
+            className={`${navItemClasses} ${
+              location.pathname === "/mini-games" ? activeClasses : inactiveClasses
+            }`}
+            aria-current={location.pathname === "/mini-games" ? "page" : undefined}
+          >
+            Mini Games
+          </Link>
+          <Link
+            to="/map"
             className={`${navItemClasses} ${
               currentView === "map" ? activeClasses : inactiveClasses
             }`}
