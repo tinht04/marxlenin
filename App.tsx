@@ -10,6 +10,12 @@ import { IconFile, IconTrash } from "./components/Icons";
 import { IntegrationMap } from "./components/IntegrationMap";
 import { QuizView } from "./components/QuizView";
 import { Footer } from "./components/Footer";
+import FTATimeline from "./components/FTATimeline";
+import BlogView from "./components/BlogView";
+import BlogDetail from "./components/BlogDetail";
+import { MultiplayerGame } from "./components/MultiplayerGame";
+import { IntegrationGame } from "./components/IntegrationGame";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 const LOCAL_STORAGE_KEY = "pdfChatData";
 
@@ -185,21 +191,42 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 text-gray-800 font-sans">
-      <Header
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        hasPdf={!!pdfFile}
-      />
-      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {currentView === "upload" && (
-          <div className="max-w-2xl mx-auto">
-            <Explainer />
-            <ControlPanel
-              status={status}
-              error={error}
-              onFileChange={handleFileChange}
-              fileInputRef={fileInputRef}
+    <BrowserRouter>
+      <div className="min-h-screen flex flex-col bg-gray-50 text-gray-800 font-sans">
+        <Header hasPdf={!!pdfFile} />
+        <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Routes>
+            <Route path="/" element={<Navigate to="/multiplayer-game" />} />
+            <Route path="/multiplayer-game" element={<MultiplayerGame />} />
+            <Route path="/mini-games" element={<IntegrationGame />} />
+            <Route path="/map" element={<IntegrationMap />} />
+            <Route path="/quiz" element={<QuizView />} />
+            <Route path="/fta" element={<FTATimeline />} />
+            <Route path="/blog" element={<BlogView />} />
+            <Route path="/blog/:id" element={<BlogDetail />} />
+            <Route
+              path="/chat"
+              element={
+                pdfFile ? (
+                  <div>
+                    <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <IconFile />
+                        <span className="font-medium text-sm truncate">
+                          {pdfFile.name}
+                        </span>
+                      </div>
+                    </div>
+                    <ChatWindow
+                      status={status}
+                      chatHistory={chatHistory}
+                      onSubmitQuestion={handleSubmitQuestion}
+                    />
+                  </div>
+                ) : (
+                  <Explainer />
+                )
+              }
             />
           </div>
         )}

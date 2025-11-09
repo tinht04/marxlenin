@@ -1,0 +1,385 @@
+[
+  {
+    "gameId": "12LVVI",
+    "hostName": "D",
+    "teams": [
+      {
+        "name": "Nhóm 1",
+        "players": [
+          {
+            "id": "5HbSrMia6akVLGlhAAAg",
+            "name": "D5",
+            "teamIndex": 0,
+            "score": 0
+          }
+        ],
+        "score": 0,
+        "answers": [
+          {
+            "questionIndex": 0,
+            "points": 0,
+            "timestamp": 1762610832840
+          },
+          {
+            "questionIndex": 1,
+            "points": 0,
+            "timestamp": 1762610936750
+          }
+        ]
+      },
+      {
+        "name": "Nhóm 2",
+        "players": [
+          {
+            "id": "zOuz3pdY7vuvL5UvAAAa",
+            "name": "D4",
+            "teamIndex": 1,
+            "score": 0
+          }
+        ],
+        "score": 120,
+        "answers": [
+          {
+            "questionIndex": 0,
+            "points": 120,
+            "timestamp": 1762610850122
+          },
+          {
+            "questionIndex": 1,
+            "points": 0,
+            "timestamp": 1762610937980
+          },
+          {
+            "questionIndex": 2,
+            "points": 0,
+            "timestamp": 1762610975238
+          }
+        ]
+      },
+      {
+        "name": "Nhóm 3",
+        "players": [
+          {
+            "id": "4UXInDt6OkUUWnq4AAAU",
+            "name": "D3",
+            "teamIndex": 2,
+            "score": 0
+          }
+        ],
+        "score": 300,
+        "answers": [
+          {
+            "questionIndex": 0,
+            "points": 120,
+            "timestamp": 1762610852160
+          },
+          {
+            "questionIndex": 1,
+            "points": 180,
+            "timestamp": 1762610938978
+          },
+          {
+            "questionIndex": 2,
+            "points": 0,
+            "timestamp": 1762610973294
+          }
+        ]
+      },
+      {
+        "name": "Nhóm 4",
+        "players": [
+          {
+            "id": "KjSZL9CIHszRWqpkAAAO",
+            "name": "D2",
+            "teamIndex": 3,
+            "score": 0
+          }
+        ],
+        "score": 170,
+        "answers": [
+          {
+            "questionIndex": 0,
+            "points": 0,
+            "timestamp": 1762610853479
+          },
+          {
+            "questionIndex": 1,
+            "points": 170,
+            "timestamp": 1762610940161
+          },
+          {
+            "questionIndex": 2,
+            "points": 0,
+            "timestamp": 1762610970313
+          }
+        ]
+      }
+    ],
+    "totalQuestions": 8,
+    "duration": 220471,
+    "answers": [
+      {
+        "teamName": "Nhóm 1",
+        "teamIndex": 0,
+        "playerId": "5HbSrMia6akVLGlhAAAg",
+        "playerName": "D5",
+        "questionIndex": 0,
+        "answer": 1,
+        "timeTaken": 3971,
+        "timestamp": 1762610832832
+      },
+      {
+        "teamName": "Nhóm 2",
+        "teamIndex": 1,
+        "playerId": "zOuz3pdY7vuvL5UvAAAa",
+        "playerName": "D4",
+        "questionIndex": 0,
+        "answer": 2,
+        "timeTaken": 21252,
+        "timestamp": 1762610850113
+      },
+      {
+        "teamName": "Nhóm 3",
+        "teamIndex": 2,
+        "playerId": "4UXInDt6OkUUWnq4AAAU",
+        "playerName": "D3",
+        "questionIndex": 0,
+        "answer": 2,
+        "timeTaken": 23290,
+        "timestamp": 1762610852151
+      },
+      {
+        "teamName": "Nhóm 4",
+        "teamIndex": 3,
+        "playerId": "KjSZL9CIHszRWqpkAAAO",
+        "playerName": "D2",
+        "questionIndex": 0,
+        "answer": 0,
+        "timeTaken": 24609,
+        "timestamp": 1762610853471
+      },
+      {
+        "teamName": "Nhóm 1",
+        "teamIndex": 0,
+        "playerId": "5HbSrMia6akVLGlhAAAg",
+        "playerName": "D5",
+        "questionIndex": 1,
+        "answer": 2,
+        "timeTaken": 3670,
+        "timestamp": 1762610936749
+      },
+      {
+        "teamName": "Nhóm 2",
+        "teamIndex": 1,
+        "playerId": "zOuz3pdY7vuvL5UvAAAa",
+        "playerName": "D4",
+        "questionIndex": 1,
+        "answer": 1,
+        "timeTaken": 4897,
+        "timestamp": 1762610937977
+      },
+      {
+        "teamName": "Nhóm 3",
+        "teamIndex": 2,
+        "playerId": "4UXInDt6OkUUWnq4AAAU",
+        "playerName": "D3",
+        "questionIndex": 1,
+        "answer": 0,
+        "timeTaken": 5897,
+        "timestamp": 1762610938977
+      },
+      {
+        "teamName": "Nhóm 4",
+        "teamIndex": 3,
+        "playerId": "KjSZL9CIHszRWqpkAAAO",
+        "playerName": "D2",
+        "questionIndex": 1,
+        "answer": 0,
+        "timeTaken": 7079,
+        "timestamp": 1762610940158
+      },
+      {
+        "teamName": "Nhóm 4",
+        "teamIndex": 3,
+        "playerId": "KjSZL9CIHszRWqpkAAAO",
+        "playerName": "D2",
+        "questionIndex": 2,
+        "answer": 1,
+        "timeTaken": 3853,
+        "timestamp": 1762610970311
+      },
+      {
+        "teamName": "Nhóm 3",
+        "teamIndex": 2,
+        "playerId": "4UXInDt6OkUUWnq4AAAU",
+        "playerName": "D3",
+        "questionIndex": 2,
+        "answer": 1,
+        "timeTaken": 6833,
+        "timestamp": 1762610973292
+      },
+      {
+        "teamName": "Nhóm 2",
+        "teamIndex": 1,
+        "playerId": "zOuz3pdY7vuvL5UvAAAa",
+        "playerName": "D4",
+        "questionIndex": 2,
+        "answer": 2,
+        "timeTaken": 8777,
+        "timestamp": 1762610975236
+      }
+    ],
+    "settings": {
+      "teamCount": 4,
+      "questionCount": 8,
+      "timePerQuestion": 30
+    },
+    "completedAt": "2025-11-08T14:10:49.330Z"
+  },
+  {
+    "gameId": "ZTZWAA",
+    "hostName": "D",
+    "teams": [
+      {
+        "name": "Nhóm 1",
+        "players": [
+          {
+            "id": "IBGkWpIo1zBtzqIyAAA-",
+            "name": "d",
+            "teamIndex": 0,
+            "score": 0
+          }
+        ],
+        "score": 340,
+        "answers": [
+          {
+            "questionIndex": 0,
+            "points": 170,
+            "timestamp": 1762662635783
+          },
+          {
+            "questionIndex": 1,
+            "points": 0,
+            "timestamp": 1762662682071
+          },
+          {
+            "questionIndex": 2,
+            "points": 170,
+            "timestamp": 1762662709852
+          }
+        ]
+      },
+      {
+        "name": "Nhóm 2",
+        "players": [
+          {
+            "id": "zc7zoZOK4dSw8m_MAAAd",
+            "name": "G",
+            "teamIndex": 1,
+            "score": 0
+          }
+        ],
+        "score": 100,
+        "answers": [
+          {
+            "questionIndex": 0,
+            "points": 0,
+            "timestamp": 1762662641818
+          },
+          {
+            "questionIndex": 1,
+            "points": 100,
+            "timestamp": 1762662697000
+          },
+          {
+            "questionIndex": 2,
+            "points": 0,
+            "timestamp": 1762662706870
+          }
+        ]
+      },
+      {
+        "name": "Nhóm 3",
+        "players": [],
+        "score": 0,
+        "answers": []
+      },
+      {
+        "name": "Nhóm 4",
+        "players": [],
+        "score": 0,
+        "answers": []
+      }
+    ],
+    "totalQuestions": 8,
+    "duration": 105922,
+    "answers": [
+      {
+        "teamName": "Nhóm 1",
+        "teamIndex": 0,
+        "playerId": "IBGkWpIo1zBtzqIyAAA-",
+        "playerName": "d",
+        "questionIndex": 0,
+        "answer": 2,
+        "timeTaken": 6911,
+        "timestamp": 1762662635774
+      },
+      {
+        "teamName": "Nhóm 2",
+        "teamIndex": 1,
+        "playerId": "zc7zoZOK4dSw8m_MAAAd",
+        "playerName": "G",
+        "questionIndex": 0,
+        "answer": 1,
+        "timeTaken": 12946,
+        "timestamp": 1762662641810
+      },
+      {
+        "teamName": "Nhóm 1",
+        "teamIndex": 0,
+        "playerId": "IBGkWpIo1zBtzqIyAAA-",
+        "playerName": "d",
+        "questionIndex": 1,
+        "answer": 1,
+        "timeTaken": 17823,
+        "timestamp": 1762662682067
+      },
+      {
+        "teamName": "Nhóm 2",
+        "teamIndex": 1,
+        "playerId": "zc7zoZOK4dSw8m_MAAAd",
+        "playerName": "G",
+        "questionIndex": 1,
+        "answer": 0,
+        "timeTaken": 32753,
+        "timestamp": 1762662696996
+      },
+      {
+        "teamName": "Nhóm 2",
+        "teamIndex": 1,
+        "playerId": "zc7zoZOK4dSw8m_MAAAd",
+        "playerName": "G",
+        "questionIndex": 2,
+        "answer": 0,
+        "timeTaken": 3132,
+        "timestamp": 1762662706869
+      },
+      {
+        "teamName": "Nhóm 1",
+        "teamIndex": 0,
+        "playerId": "IBGkWpIo1zBtzqIyAAA-",
+        "playerName": "d",
+        "questionIndex": 2,
+        "answer": 3,
+        "timeTaken": 6112,
+        "timestamp": 1762662709850
+      }
+    ],
+    "settings": {
+      "teamCount": 4,
+      "questionCount": 8,
+      "timePerQuestion": 30
+    },
+    "completedAt": "2025-11-09T04:32:14.785Z"
+  }
+]

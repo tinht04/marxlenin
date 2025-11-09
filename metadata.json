@@ -1,5 +1,79 @@
 {
-  "name": "Chat with your PDF using Gemini",
-  "description": "An application that allows you to upload a PDF file and ask questions about its content using Google's Gemini API, demonstrating how to use AI Studio concepts to build a custom chatbot.",
-  "requestFramePermissions": []
+  "name": "MarxLeninEdu - Multiplayer Quiz Game",
+  "description": "Educational multiplayer quiz game about Marx-Lenin ideology",
+  "requestFramePermissions": [],
+  "questions": [
+    {
+      "question": "Ai là tác giả của tác phẩm 'Tư bản'?",
+      "answers": ["Karl Marx", "Friedrich Engels", "V.I.Lenin", "Stalin"],
+      "correctAnswer": 0,
+      "explanation": "Karl Marx là tác giả của tác phẩm kinh điển 'Tư bản' (Das Kapital)"
+    },
+    {
+      "question": "Cách mạng Tháng Mười Nga diễn ra vào năm nào?",
+      "answers": ["1905", "1917", "1920", "1924"],
+      "correctAnswer": 1,
+      "explanation": "Cách mạng Tháng Mười Nga thành công vào năm 1917 dưới sự lãnh đạo của V.I.Lenin"
+    },
+    {
+      "question": "Chủ nghĩa xã hội khoa học do ai sáng lập?",
+      "answers": ["Marx và Engels", "Lenin", "Hồ Chí Minh", "Mao Trạch Đông"],
+      "correctAnswer": 0,
+      "explanation": "Chủ nghĩa xã hội khoa học được sáng lập bởi Karl Marx và Friedrich Engels"
+    },
+    {
+      "question": "Tác phẩm 'Nhà nước và cách mạng' do ai viết?",
+      "answers": ["Marx", "Engels", "Lenin", "Trotsky"],
+      "correctAnswer": 2,
+      "explanation": "V.I.Lenin là tác giả của 'Nhà nước và cách mạng' (1917)"
+    },
+    {
+      "question": "Giai cấp nào là lực lượng lãnh đạo cách mạng xã hội chủ nghĩa?",
+      "answers": ["Nông dân", "Công nhân", "Trí thức", "Tư sản"],
+      "correctAnswer": 1,
+      "explanation": "Giai cấp công nhân là lực lượng lãnh đạo cách mạng xã hội chủ nghĩa theo thuyết Marx-Lenin"
+    },
+    {
+      "question": "Giá trị thизлишng dư là gì trong học thuyết Marx?",
+      "answers": ["Lợi nhuận", "Tiền lương", "Giá trị do công nhân tạo ra nhưng bị tư bản chiếm đoạt", "Thuế"],
+      "correctAnswer": 2,
+      "explanation": "Giá trị thặng dư là phần giá trị do công nhân sản xuất ra nhưng bị nhà tư bản chiếm đoạt"
+    },
+    {
+      "question": "Chủ nghĩa đế quốc là giai đoạn nào của chủ nghĩa tư bản?",
+      "answers": ["Sơ khai", "Phát triển", "Cao nhất và cuối cùng", "Trung bình"],
+      "correctAnswer": 2,
+      "explanation": "Theo Lenin, chủ nghĩa đế quốc là giai đoạn cao nhất và cuối cùng của chủ nghĩa tư bản"
+    },
+    {
+      "question": "Đảng Bolshevik do ai sáng lập?",
+      "answers": ["Marx", "Engels", "Lenin", "Stalin"],
+      "correctAnswer": 2,
+      "explanation": "V.I.Lenin sáng lập và lãnh đạo Đảng Bolshevik (Đảng Cộng sản Nga)"
+    },
+    {
+      "question": "Tuyên ngôn của Đảng Cộng sản được xuất bản năm nào?",
+      "answers": ["1848", "1867", "1917", "1924"],
+      "correctAnswer": 0,
+      "explanation": "Tuyên ngôn của Đảng Cộng sản được Marx và Engels xuất bản năm 1848"
+    },
+    {
+      "question": "Theo Marx, động lực phát triển xã hội là gì?",
+      "answers": ["Tư tưởng", "Đấu tranh giai cấp", "Khoa học công nghệ", "Văn hóa"],
+      "correctAnswer": 1,
+      "explanation": "Theo Marx, đấu tranh giai cấp là động lực phát triển xã hội"
+    },
+    {
+      "question": "Chuyên chính vô sản là gì?",
+      "answers": ["Chế độ độc tài", "Quyền lực của giai cấp công nhân", "Chế độ quân chủ", "Dân chủ tư sản"],
+      "correctAnswer": 1,
+      "explanation": "Chuyên chính vô sản là quyền lực nhà nước của giai cấp công nhân trong thời kỳ quá độ lên chủ nghĩa xã hội"
+    },
+    {
+      "question": "Ai là người kế thừa và phát triển học thuyết Marx?",
+      "answers": ["Engels", "Lenin", "Stalin", "Cả A và B"],
+      "correctAnswer": 3,
+      "explanation": "Cả Engels và Lenin đều kế thừa và phát triển học thuyết Marx"
+    }
+  ]
 }
