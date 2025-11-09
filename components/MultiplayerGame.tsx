@@ -201,8 +201,18 @@ export const MultiplayerGame: React.FC = () => {
   // No need for hardcoded questions here
 
   useEffect(() => {
-    // Connect to Socket.IO server using env variable
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || "http://localhost:3002";
+    // Connect to Socket.IO server using env variable.
+    // Support either an absolute URL (https://host) or a relative value starting with '/' to mean same origin.
+    const rawSocketUrl = import.meta.env.VITE_SOCKET_URL ?? "";
+    let socketUrl = rawSocketUrl || "http://localhost:3002";
+    try {
+      if (socketUrl.startsWith("/")) {
+        // relative -> use current origin
+        socketUrl = window.location.origin;
+      }
+    } catch (e) {
+      // window may be undefined in SSR environments; fallback remains
+    }
     const newSocket = io(socketUrl);
     setSocket(newSocket);
 

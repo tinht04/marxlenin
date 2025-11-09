@@ -9,10 +9,11 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
-// Load .env from parent directory
+// Load .env from project root (if present). On Railway/Render the platform provides env vars.
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-config({ path: path.resolve(__dirname, "../.env") });
+// Try to load .env from repository root (../../.env relative to this file). If not present, ignore.
+config({ path: path.resolve(__dirname, "../../.env"), override: false });
 
 const app = express();
 const httpServer = createServer(app);
@@ -27,6 +28,20 @@ const port = process.env.PORT || 3002;
 
 app.use(cors());
 app.use(bodyParser.json({ limit: "1mb" }));
+
+// Serve built frontend if it exists (so frontend + socket server can be one Railway service)
+const staticPath = path.resolve(__dirname, "../../dist");
+fs.access(staticPath)
+  .then(() => {
+    console.log("📦 Found frontend build at", staticPath, "— serving static files.");
+    app.use(express.static(staticPath));
+    app.get("/*", (req, res) => {
+      res.sendFile(path.resolve(staticPath, "index.html"));
+    });
+  })
+  .catch(() => {
+    console.log("ℹ️ No frontend build found at", staticPath);
+  });
 
 const API_KEY = process.env.GEMINI_API_KEY;
 if (!API_KEY) {
