@@ -1,4 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
+// Silence debug logs in production builds. During local development logs still print.
+try {
+  if (typeof window !== 'undefined' && import.meta.env && import.meta.env.PROD) {
+    // preserve console.error for real errors
+    console.log = () => {};
+    console.info = () => {};
+    console.debug = () => {};
+    console.warn = () => {};
+  }
+} catch (e) {
+  // ignore if import.meta.env isn't available in some environments
+}
 import { io, Socket } from "socket.io-client";
 
 type GamePhase = "home" | "create" | "join" | "lobby" | "playing" | "host-view" | "waiting-results" | "results";
@@ -433,6 +445,32 @@ export const MultiplayerGame: React.FC = () => {
       }
     });
 
+    // Handle server-validated answer results
+    newSocket.on("answer-result", ({ isCorrect, points, correctAnswer }) => {
+      console.log('⬅️ answer-result from server', { isCorrect, points, correctAnswer });
+      // Find the shuffled question for this player to locate the correct answer index
+      try {
+        const originalQuestion = myQuestions?.[currentQuestion];
+        if (originalQuestion) {
+          const shuffledQ = getShuffledQuestion(originalQuestion);
+          const correctIndex = shuffledQ.options.findIndex(
+            (opt) => opt?.trim() === String(correctAnswer || '').trim()
+          );
+          if (correctIndex >= 0) {
+            setCorrectAnswerIndex(correctIndex);
+          }
+        }
+      } catch (e) {
+        console.warn('Could not compute correctAnswerIndex from server answer-result', e);
+      }
+
+      setShowingCorrectAnswer(true);
+
+      if (isCorrect && typeof points === 'number') {
+        setMyScore((s) => s + points);
+      }
+    });
+
     newSocket.on("question-changed", ({ currentQuestion }) => {
       setQuestionTransition(true);
       setTimeout(() => {
@@ -660,32 +698,13 @@ export const MultiplayerGame: React.FC = () => {
       shuffledOptions: shuffledQ.options
     });
     
-    // Validate IMMEDIATELY on client side
-    const isCorrect = answerIndex === shuffledQ.correctAnswerIndex;
-    
-    // Calculate points (same formula as server)
-    let points = 0;
-    if (isCorrect) {
-      const timeLimit = gameState?.settings?.timePerQuestion || 30;
-      const speedRatio = Math.max(0, (timeLimit - timeInSeconds) / timeLimit);
-      const speedBonus = Math.floor(speedRatio * 50);
-      points = 100 + speedBonus;
-    }
-    
-    console.log(`Answer: ${isCorrect ? 'CORRECT' : 'WRONG'}, Points: ${points}, Selected: ${answerIndex}, Correct should be: ${shuffledQ.correctAnswerIndex}`);
-    
-    // Update score immediately
-    setMyScore(prevScore => prevScore + points);
-    
-    // Show correct answer
-    setCorrectAnswerIndex(shuffledQ.correctAnswerIndex);
-    setShowingCorrectAnswer(true);
-    
-    // Send to server to update team score in realtime
-    socket.emit("update-score", {
+    // Send answer to server for authoritative validation and scoring.
+    // Server will emit `answer-result` (to this socket) and `scores-updated` (to the room).
+    console.log('➡️ sending submit-answer to server', { gameId, answerIndex, timeInSeconds });
+    socket.emit("submit-answer", {
       gameId,
-      teamIndex: myTeamIndex,
-      points
+      answerIndex,
+      timeTaken: timeInSeconds
     });
     
     // Auto-advance after 3 seconds
