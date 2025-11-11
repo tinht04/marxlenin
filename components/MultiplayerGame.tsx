@@ -78,6 +78,24 @@ export const MultiplayerGame: React.FC = () => {
   const timerRef = useRef<number | null>(null);
   const answerTimeRef = useRef<number>(0);
   const autoNextTimerRef = useRef<number | null>(null);
+  
+  // Refs to track latest values in socket handlers (avoid stale closure)
+  const myScoreRef = useRef<number>(0);
+  const myTeamIndexRef = useRef<number>(-1);
+  const gameIdRef = useRef<string | null>(null);
+
+  // Keep refs in sync with state
+  useEffect(() => {
+    myScoreRef.current = myScore;
+  }, [myScore]);
+
+  useEffect(() => {
+    myTeamIndexRef.current = myTeamIndex;
+  }, [myTeamIndex]);
+
+  useEffect(() => {
+    gameIdRef.current = gameId;
+  }, [gameId]);
 
   // Save game session to localStorage
   const saveGameSession = (data: {
@@ -134,7 +152,6 @@ export const MultiplayerGame: React.FC = () => {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     
-    console.log(`🎲 Shuffled ${shuffled.length} questions for player ${socketId.substring(0, 8)}...`);
     return shuffled;
   };
 
@@ -163,7 +180,6 @@ export const MultiplayerGame: React.FC = () => {
     
     // Fallback: If correctAnswerIndex is missing or invalid, try to find it from correctAnswer
     if (originalCorrectIndex === undefined || originalCorrectIndex === null || originalCorrectIndex < 0) {
-      console.warn('⚠️ Missing correctAnswerIndex, trying to find from correctAnswer:', question.correctAnswer);
       
       if (question.correctAnswer) {
         const correctAnswerStr = String(question.correctAnswer).trim();
@@ -179,10 +195,8 @@ export const MultiplayerGame: React.FC = () => {
           originalCorrectIndex = letterMap[correctAnswerStr.toUpperCase()] ?? 0;
         }
         
-        console.log('✅ Found correctAnswerIndex:', originalCorrectIndex);
       } else {
         // Ultimate fallback - assume first option is correct
-        console.error('❌ No correctAnswer found! Defaulting to 0');
         originalCorrectIndex = 0;
       }
     }
@@ -308,13 +322,11 @@ export const MultiplayerGame: React.FC = () => {
         if (game.questions && game.questions.length > 0) {
           const shuffledQuestions = shuffleQuestionsForPlayer(game.questions, newSocket.id);
           setMyQuestions(shuffledQuestions);
-          console.log(`✅ Restored ${shuffledQuestions.length} shuffled questions on rejoin`);
         }
         
         // Restore currentQuestion from localStorage (each player has their own progress)
         const restoredQuestion = savedSession?.currentQuestion ?? 0;
         setCurrentQuestion(restoredQuestion);
-        console.log(`📍 Restored question progress: ${restoredQuestion + 1}/${game.questions?.length || 0}`);
         
         if (amHost) {
           setPhase("host-view");
@@ -352,7 +364,6 @@ export const MultiplayerGame: React.FC = () => {
             }, 100); // Small delay to ensure phase is set
           } else {
             // Player not found in any team - go back to home
-            console.error(`Player "${myPlayerName}" not found in game teams`);
             clearGameSession();
             setPhase("home");
           }
@@ -371,13 +382,16 @@ export const MultiplayerGame: React.FC = () => {
         setPhase("results");
       }
       
-      console.log(`Rejoined game ${game.id} as ${amHost ? 'host' : 'player'}, phase: ${game.phase}`);
     });
 
     newSocket.on("rejoin-failed", () => {
       clearGameSession();
       setIsReconnecting(false);
       setPhase("home");
+      
+      // Show error message for 3 seconds
+      setErrorMessage("Game không tồn tại hoặc đã kết thúc. Vui lòng tạo game mới.");
+      setTimeout(() => setErrorMessage(null), 3000);
     });
 
     newSocket.on("game-started", (game) => {
@@ -393,7 +407,6 @@ export const MultiplayerGame: React.FC = () => {
       if (game.questions && game.questions.length > 0) {
         const shuffledQuestions = shuffleQuestionsForPlayer(game.questions, newSocket.id);
         setMyQuestions(shuffledQuestions);
-        console.log(`✅ Player received ${shuffledQuestions.length} unique shuffled questions`);
       }
       
       // Start countdown animation: 3, 2, 1, GO!
@@ -450,7 +463,19 @@ export const MultiplayerGame: React.FC = () => {
     // No longer need answer-result handler - validation is done on client
 
     newSocket.on("game-finished", (game) => {
-      console.log("Game finished!", game);
+      
+      // IMPORTANT: Send final score BEFORE clearing session
+      // This handles case where host ends game early (mid-game)
+      if (gameIdRef.current && myTeamIndexRef.current !== undefined) {
+        const currentScore = myScoreRef.current || 0;
+        newSocket.emit("player-finished", {
+          gameId: gameIdRef.current,
+          playerId: newSocket.id,
+          finalScore: currentScore,
+          teamIndex: myTeamIndexRef.current
+        });
+      }
+      
       setGameState(game);
       
       // Set final scores from game teams with players list
@@ -471,6 +496,9 @@ export const MultiplayerGame: React.FC = () => {
       if (autoNextTimerRef.current) {
         clearTimeout(autoNextTimerRef.current);
       }
+      
+      // Clear localStorage session when game finishes
+      clearGameSession();
     });
 
     newSocket.on("scores-updated", ({ teams }) => {
@@ -490,9 +518,20 @@ export const MultiplayerGame: React.FC = () => {
     });
 
     newSocket.on("game-ended", ({ finalScores }) => {
+      // Send final score before game ends
+      if (gameIdRef.current && myTeamIndexRef.current !== undefined) {
+        const currentScore = myScoreRef.current || 0;
+        newSocket.emit("player-finished", {
+          gameId: gameIdRef.current,
+          playerId: newSocket.id,
+          finalScore: currentScore,
+          teamIndex: myTeamIndexRef.current
+        });
+      }
+      
       setScores(finalScores);
       setPhase("results");
-      clearGameSession();
+      clearGameSession(); 
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
@@ -630,7 +669,6 @@ export const MultiplayerGame: React.FC = () => {
   };
 
   const submitAnswer = (answerIndex: number) => {
-    console.log('=== submitAnswer called ===', { answerIndex, hasAnswered, socket: !!socket, gameId, myTeamIndex });
     
     if (hasAnswered || !socket || !gameId || myTeamIndex === -1) return;
 
@@ -642,23 +680,11 @@ export const MultiplayerGame: React.FC = () => {
     
     // Use myQuestions (shuffled uniquely for this player) instead of gameState.questions
     if (!myQuestions || myQuestions.length === 0) {
-      console.error('❌ No questions available for this player!');
       return;
     }
     
     const originalQuestion = myQuestions[currentQuestion];
-    const shuffledQ = getShuffledQuestion(originalQuestion);
-    
-    // DEBUG: Log question data
-    console.log('🔍 QUESTION DEBUG:', {
-      questionId: originalQuestion.id,
-      questionText: originalQuestion.question,
-      originalCorrectIndex: originalQuestion.correctAnswerIndex,
-      shuffledCorrectIndex: shuffledQ.correctAnswerIndex,
-      selectedIndex: answerIndex,
-      originalOptions: originalQuestion.options,
-      shuffledOptions: shuffledQ.options
-    });
+    const shuffledQ = getShuffledQuestion(originalQuestion);  
     
     // Validate IMMEDIATELY on client side
     const isCorrect = answerIndex === shuffledQ.correctAnswerIndex;
@@ -672,10 +698,10 @@ export const MultiplayerGame: React.FC = () => {
       points = 100 + speedBonus;
     }
     
-    console.log(`Answer: ${isCorrect ? 'CORRECT' : 'WRONG'}, Points: ${points}, Selected: ${answerIndex}, Correct should be: ${shuffledQ.correctAnswerIndex}`);
     
     // Update score immediately
-    setMyScore(prevScore => prevScore + points);
+    const newScore = myScore + points;
+    setMyScore(newScore);
     
     // Show correct answer
     setCorrectAnswerIndex(shuffledQ.correctAnswerIndex);
@@ -740,7 +766,6 @@ export const MultiplayerGame: React.FC = () => {
       }
     } else {
       // Last question completed - show waiting results (leaderboard)
-      console.log("All questions completed! Showing leaderboard...");
       setPhase("waiting-results");
       
       // Clear timers
@@ -751,9 +776,17 @@ export const MultiplayerGame: React.FC = () => {
         clearTimeout(autoNextTimerRef.current);
       }
       
-      // Notify server that player finished
+      // Clear session - game is ending
+      clearGameSession();
+      
+      // Notify server that player finished with final score
       if (socket && gameId) {
-        socket.emit("player-finished", { gameId });
+        socket.emit("player-finished", { 
+          gameId, 
+          playerId: socket.id,
+          finalScore: myScore,
+          teamIndex: myTeamIndex
+        });
       }
     }
   };

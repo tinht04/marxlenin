@@ -33,14 +33,14 @@ app.use(bodyParser.json({ limit: "1mb" }));
 const staticPath = path.resolve(__dirname, "../../dist");
 fs.access(staticPath)
   .then(() => {
-    console.log("📦 Found frontend build at", staticPath, "— serving static files.");
+    console.log("Found frontend build at", staticPath, "— serving static files.");
     app.use(express.static(staticPath));
     app.get("/*", (req, res) => {
       res.sendFile(path.resolve(staticPath, "index.html"));
     });
   })
   .catch(() => {
-    console.log("ℹ️ No frontend build found at", staticPath);
+    console.log("No frontend build found at", staticPath);
   });
 
 const API_KEY = process.env.GEMINI_API_KEY;
@@ -177,9 +177,9 @@ async function loadQuestionsFromGoogleSheet() {
       }
     }
     
-    console.log(`✅ Loaded ${allQuestions.length} questions from Google Sheet`);
+    console.log(` Loaded ${allQuestions.length} questions from Google Sheet`);
   } catch (err) {
-    console.error("❌ Failed to load questions from Google Sheet:", err);
+    console.error(" Failed to load questions from Google Sheet:", err);
     allQuestions = [];
   }
 }
@@ -189,7 +189,6 @@ loadQuestionsFromGoogleSheet();
 
 // Socket.IO event handlers
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
 
   socket.on("create-game", ({ hostName, gameSettings }) => {
     const gameId = generateGameId();
@@ -224,7 +223,6 @@ io.on("connection", (socket) => {
     games.set(gameId, game);
     socket.join(gameId);
     socket.emit("game-created", { gameId, game });
-    console.log(`Game ${gameId} created by ${hostName}`);
   });
 
   socket.on("join-game", ({ gameId, playerName }) => {
@@ -264,7 +262,6 @@ io.on("connection", (socket) => {
 
     socket.join(gameId);
     io.to(gameId).emit("game-updated", game);
-    console.log(`${playerName} joined game ${gameId}`);
   });
 
   socket.on("delete-game", ({ gameId }) => {
@@ -276,7 +273,6 @@ io.on("connection", (socket) => {
 
     io.to(gameId).emit("game-deleted");
     games.delete(gameId);
-    console.log(`Game ${gameId} deleted by host`);
   });
 
   socket.on("start-game", ({ gameId }) => {
@@ -300,7 +296,6 @@ io.on("connection", (socket) => {
     const selectedQuestions = shuffleArray([...allQuestions]).slice(0, actualCount);
     game.questions = selectedQuestions;
     
-    console.log(`📝 Selected ${actualCount} random questions from ${availableCount} available (requested: ${requestedCount})`);
 
     // Auto-assign only waiting players (teamIndex === -1) to teams in round-robin fashion
     const waitingPlayers = game.players.filter(p => p.teamIndex === -1);
@@ -311,7 +306,6 @@ io.on("connection", (socket) => {
       
       // Make sure team exists before pushing
       if (!game.teams[teamIndex]) {
-        console.error(`Team ${teamIndex} does not exist! Total teams: ${game.teams.length}`);
         return;
       }
       
@@ -322,7 +316,6 @@ io.on("connection", (socket) => {
     game.currentQuestion = 0;
 
     io.to(gameId).emit("game-started", game);
-    console.log(`Game ${gameId} started with ${game.players.length} players and ${selectedQuestions.length} questions`);
   });
 
   socket.on("update-score", ({ gameId, teamIndex, points }) => {
@@ -363,7 +356,6 @@ io.on("connection", (socket) => {
     game.host = socket.id;
     socket.join(gameId);
     socket.emit("rejoined", { game, isHost: true });
-    console.log(`Host ${hostName} rejoined game ${gameId}`);
   });
 
   socket.on("rejoin-as-player", ({ gameId, playerName }) => {
@@ -378,7 +370,6 @@ io.on("connection", (socket) => {
       player.id = socket.id;
       socket.join(gameId);
       socket.emit("rejoined", { game, isHost: false });
-      console.log(`Player ${playerName} rejoined game ${gameId}`);
     } else {
       socket.emit("error", { message: "Player not found in game" });
     }
@@ -387,7 +378,6 @@ io.on("connection", (socket) => {
   socket.on("leave-room", ({ gameId }) => {
     if (gameId) {
       socket.leave(gameId);
-      console.log(`Socket ${socket.id} left room ${gameId}`);
     }
   });
 
@@ -401,7 +391,6 @@ io.on("connection", (socket) => {
     const hasAnswered = game.answeredPlayers.has(socket.id);
     
     if (!isHost && (!player || !hasAnswered)) {
-      console.log(`Player ${socket.id} tried to next without answering`);
       return;
     }
 
@@ -411,13 +400,11 @@ io.on("connection", (socket) => {
     if (game.currentQuestion >= game.questions.length) {
       game.phase = "finished";
       io.to(gameId).emit("game-finished", game);
-      console.log(`Game ${gameId} finished`);
     } else {
       io.to(gameId).emit("question-changed", {
         currentQuestion: game.currentQuestion,
         question: game.questions[game.currentQuestion]
       });
-      console.log(`Game ${gameId} - Question ${game.currentQuestion + 1} (triggered by ${isHost ? 'host' : player.name})`);
     }
   });
 
@@ -430,27 +417,19 @@ io.on("connection", (socket) => {
 
     // Check if player already answered THIS question
     if (game.answeredPlayers.has(socket.id)) {
-      console.log(`${player.name} already answered this question`);
       return;
     }
 
     const question = game.questions[game.currentQuestion];
     if (!question) {
-      console.error(`Question not found at index ${game.currentQuestion}`);
       return;
     }
 
-    console.log(`Player ${player.name} submitted answer:`, {
-      answerIndex,
-      correctAnswerIndex: question.correctAnswerIndex,
-      questionId: question.id,
-      currentQuestion: game.currentQuestion
-    });
+  
 
     // SERVER validates the answer (source of truth)
     const isCorrect = answerIndex === question.correctAnswerIndex;
     
-    console.log(`Validation result: answerIndex(${answerIndex}) === correctAnswerIndex(${question.correctAnswerIndex}) = ${isCorrect}`);
     
     // Calculate points based on correctness and speed
     let finalPoints = 0;
@@ -474,17 +453,10 @@ io.on("connection", (socket) => {
     // Mark player as answered
     game.answeredPlayers.add(socket.id);
 
-    console.log(`${player.name} answered Q${game.currentQuestion + 1} - Correct: ${isCorrect}, Points: ${finalPoints}`);
 
     // Get correct answer text
     const correctAnswerText = question.options?.[question.correctAnswerIndex];
-    console.log('Correct answer:', {
-      correctAnswerIndex: question.correctAnswerIndex,
-      correctAnswerText,
-      optionsLength: question.options?.length,
-      hasOptions: !!question.options
-    });
-
+   
     // Send result ONLY to the player who answered (not broadcast)
     socket.emit("answer-result", { 
       isCorrect, 
@@ -503,9 +475,44 @@ io.on("connection", (socket) => {
       }))
     });
 
-    console.log(`${player.name} answered Q${game.currentQuestion + 1} - Correct: ${isCorrect}, Points: ${finalPoints}`);
     
     // NOTE: NO auto-advance here! Each player advances individually on their own client.
+  });
+
+  // Handle player finishing all questions (ensure final score is synced)
+  socket.on("player-finished", ({ gameId, playerId, finalScore, teamIndex }) => {
+    const game = games.get(gameId);
+    if (!game) return;
+
+    const player = game.players.find(p => p.id === socket.id);
+    if (!player) return;
+
+    // Ensure player's final score is recorded (in case some update-score events were lost)
+    // Use the maximum of server-tracked score and client-reported score
+    const serverScore = player.score || 0;
+    const clientScore = finalScore || 0;
+    
+    if (clientScore > serverScore) {
+      player.score = clientScore;
+      
+      // Also update team score if needed
+      if (teamIndex >= 0 && teamIndex < game.teams.length) {
+        const scoreDiff = clientScore - serverScore;
+        game.teams[teamIndex].score += scoreDiff;
+      }
+    }
+
+    
+    // Broadcast updated scores
+    io.to(gameId).emit("scores-updated", {
+      teams: game.teams.map((t, idx) => ({
+        name: t.name,
+        index: idx,
+        score: t.score,
+        playerCount: t.players.length,
+        players: t.players.map(p => ({ name: p.name, score: p.score || 0 }))
+      }))
+    });
   });
 
   socket.on("end-game", ({ gameId }) => {
