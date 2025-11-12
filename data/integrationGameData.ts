@@ -41,7 +41,7 @@ export const timelineEvents: TimelineEvent[] = [
   { id: "t3", year: "2007", event: "Việt Nam chính thức gia nhập WTO", correctOrder: 3 },
   { id: "t4", year: "2019", event: "Hiệp định EVFTA được ký kết", correctOrder: 4 },
   { id: "t5", year: "2020", event: "Việt Nam phê chuẩn EVFTA và CPTPP có hiệu lực", correctOrder: 5 },
-  { id: "t6", year: "2022", event: "RCEP có hiệu lực với Việt Nam", correctOrder: 6 },
+  { id: "t6", year: "2022", event: "RCEP có hiệu lực với Việt Nam", correctOrder: 6 }
 ];
 
 export const quizQuestions: QuizQuestion[] = [
@@ -89,5 +89,55 @@ export const quizQuestions: QuizQuestion[] = [
     options: ["8", "10", "11", "15"],
     correctAnswer: 2,
     explanation: "CPTPP có 11 quốc gia thành viên sau khi Mỹ rút khỏi TPP."
+  },
+  {
+    id: "q6",
+    question: "RCEP bao gồm các quốc gia thuộc khu vực nào?",
+    options: ["Châu Á", "Châu Âu", "Châu Mỹ", "Châu Phi"],
+    correctAnswer: 0,
+    explanation: "RCEP (Regional Comprehensive Economic Partnership) bao gồm các quốc gia thuộc khu vực Châu Á - Thái Bình Dương."
+  },
+  {
+    id: "q7",
+    question: "Hội nhập kinh tế quốc tế giúp Việt Nam đạt được điều gì?",
+    options: [
+      "Tăng trưởng kinh tế bền vững",
+      "Giảm xuất khẩu",
+      "Tăng thuế nhập khẩu",
+      "Giảm đầu tư nước ngoài"
+    ],
+    correctAnswer: 0,
+    explanation: "Hội nhập kinh tế quốc tế giúp Việt Nam tăng trưởng kinh tế bền vững thông qua mở rộng thị trường và thu hút đầu tư."
+  },
+  {
+    id: "q8",
+    question: "Hiệp định FTA là gì?",
+    options: [
+      "Hiệp định về thương mại",
+      "Hiệp định thương mại tự do",
+      "Hiệp định hợp tác quốc tế",
+      "Hiệp định về an ninh quốc phòng"
+    ],
+    correctAnswer: 1,
+    explanation: "FTA (Free Trade Agreement) là hiệp định thương mại tự do nhằm giảm hoặc loại bỏ rào cản thương mại giữa các quốc gia thành viên."
+  },
+  {
+    id: "q9",
+    question: "Một trong những mục tiêu của hội nhập kinh tế quốc tế là gì?",
+    options: [
+      "Tăng trưởng kinh tế bền vững",
+      "Giảm xuất khẩu",
+      "Tăng thuế nhập khẩu",
+      "Giảm đầu tư nước ngoài"
+    ],
+    correctAnswer: 0,
+    explanation: "Một trong những mục tiêu của hội nhập kinh tế quốc tế là đạt được tăng trưởng kinh tế bền vững thông qua mở rộng thị trường và thu hút đầu tư."
+  },
+  {
+    id: "q10",
+    question: "Việt Nam gia nhập ASEAN vào năm nào?",
+    options: ["1992", "1993", "1994", "1995"],
+    correctAnswer: 3,
+    explanation: "Việt Nam chính thức trở thành thành viên thứ 7 của ASEAN vào ngày 28/07/1995."
   }
 ];
