@@ -1,71 +1,27 @@
 import React, { useEffect, useState, useRef } from "react";
-import Papa from "papaparse";
 import { motion, AnimatePresence } from "framer-motion";
-
-const FTA_SHEET_URL =
-  "https://docs.google.com/spreadsheets/d/14Zid-qM_4-UpjowzlauzrEo6B5buIbU_VC9Pj_7yLuA/export?format=csv&gid=1785429482";
-
-export interface FTARecord {
-  ID: string;
-  FTA_Name: string;
-  Signing_Date: string;
-  Effective_Date: string;
-  Members: string;
-  Description: string;
-  VN_Role: string;
-  Topic: string;
-  Link: string;
-  Status: string;
-  Benefits: string;
-  Source: string;
-}
+import { daiHoiData, DaiHoiRecord } from "../data/daihoidangData";
 
 const FTATimeline: React.FC = () => {
-  const [ftaList, setFtaList] = useState<FTARecord[]>([]);
-  const [selectedFTA, setSelectedFTA] = useState<FTARecord | null>(null);
-  const [filterTopic, setFilterTopic] = useState<string>("All");
-  const [topics, setTopics] = useState<string[]>([]);
+  const [daiHoiList] = useState<DaiHoiRecord[]>(daiHoiData);
+  const [selectedDaiHoi, setSelectedDaiHoi] = useState<DaiHoiRecord | null>(null);
+  const [filterPeriod, setFilterPeriod] = useState<string>("All");
+  const [periods] = useState<string[]>([
+    "All",
+    "Thành lập & Kháng chiến (1930-1954)",
+    "Xây dựng & Thống nhất (1954-1986)",
+    "Đổi mới & Phát triển (1986-nay)"
+  ]);
   const [videoPlaying, setVideoPlaying] = useState(true);
   const [videoOpacity, setVideoOpacity] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const colors = [
-    "#FF6B6B",
-    "#4ECDC4",
-    "#45B7D1",
-    "#96CEB4",
-    "#FFEAA7",
-    "#DFE6E9",
-    "#74B9FF",
-    "#A29BFE",
-    "#FD79A8",
-    "#FDCB6E",
-  ];
-
-  const getYear = (date: string) => {
-    const d = new Date(date);
-    return isNaN(d.getFullYear()) ? "" : d.getFullYear();
+  const getYearGroup = (year: string): string => {
+    const y = parseInt(year);
+    if (y <= 1954) return "Thành lập & Kháng chiến (1930-1954)";
+    if (y <= 1986) return "Xây dựng & Thống nhất (1954-1986)";
+    return "Đổi mới & Phát triển (1986-nay)";
   };
-
-  useEffect(() => {
-    Papa.parse(FTA_SHEET_URL, {
-      download: true,
-      header: true,
-      complete: (results) => {
-        const data = results.data as FTARecord[];
-        const filtered = data.filter((item) => item.FTA_Name);
-        setFtaList(filtered);
-
-        const uniqueTopics = Array.from(
-          new Set(filtered.map((item) => item.Topic).filter(Boolean))
-        ).sort();
-        setTopics(["All", ...uniqueTopics]);
-      },
-      error: (err) => {
-        console.error("Error parsing CSV:", err);
-      },
-    });
-  }, []);
 
   // Video fade in/out effect
   useEffect(() => {
@@ -120,9 +76,9 @@ const FTATimeline: React.FC = () => {
   }, []);
 
   const filteredList =
-    filterTopic === "All"
-      ? ftaList
-      : ftaList.filter((fta) => fta.Topic === filterTopic);
+    filterPeriod === "All"
+      ? daiHoiList
+      : daiHoiList.filter((dh) => getYearGroup(dh.Year) === filterPeriod);
 
   return (
     <div
@@ -164,12 +120,14 @@ const FTATimeline: React.FC = () => {
               backgroundClip: "text",
               marginBottom: 8,
               letterSpacing: "-1px",
+              fontFamily: "'Inter', 'Segoe UI', 'Roboto', 'Arial', sans-serif",
             }}
           >
-            Vietnam FTA Timeline
+            LỊCH SỬ CÁC KÌ ĐẠI HỘI ĐẢNG VIỆT NAM
           </h1>
           <p style={{ color: "#8b5a00", fontSize: 16, fontWeight: 600 }}>
-            Các Hiệp Định Thương Mại Tự Do
+            Các kỳ Đại hội Đảng Cộng sản Việt Nam, bắt đầu từ năm 1935, là những dấu mốc quan trọng định hướng chiến lược phát triển đất nước.</p>
+<p style={{ color: "#8b5a00", fontSize: 16, fontWeight: 600 }}>Mỗi kỳ đại hội đều tổng kết chặng đường đã qua và đề ra phương hướng, nhiệm vụ cho nhiệm kỳ mới.
           </p>
         </div>
 
@@ -183,8 +141,8 @@ const FTATimeline: React.FC = () => {
         >
           <div style={{ position: "relative" }}>
             <select
-              value={filterTopic}
-              onChange={(e) => setFilterTopic(e.target.value)}
+              value={filterPeriod}
+              onChange={(e) => setFilterPeriod(e.target.value)}
               style={{
                 background: "linear-gradient(135deg, #fff9f0, #ffffff)",
                 border: "2px solid #d4a574",
@@ -196,20 +154,20 @@ const FTATimeline: React.FC = () => {
                 outline: "none",
                 cursor: "pointer",
                 appearance: "none",
-                minWidth: 250,
+                minWidth: 350,
                 transition: "all 0.3s ease",
                 boxShadow: "0 4px 12px rgba(184, 134, 11, 0.1)",
               }}
               onFocus={(e) => (e.target.style.borderColor = "#b8860b")}
               onBlur={(e) => (e.target.style.borderColor = "#d4a574")}
             >
-              {topics.map((topic) => (
+              {periods.map((period) => (
                 <option
-                  key={topic}
-                  value={topic}
+                  key={period}
+                  value={period}
                   style={{ background: "#fff9f0", color: "#8b5a00" }}
                 >
-                  {topic === "All" ? "📋 Tất cả" : `📁 ${topic}`}
+                  {period === "All" ? "📋 Tất cả các kỳ" : `📅 ${period}`}
                 </option>
               ))}
             </select>
@@ -289,7 +247,7 @@ const FTATimeline: React.FC = () => {
                   fontWeight: 600,
                 }}
               >
-                Không tìm thấy FTA nào
+                Không tìm thấy kỳ Đại hội nào
               </div>
             ) : (
               <div style={{ position: "relative" }}>
@@ -309,13 +267,13 @@ const FTATimeline: React.FC = () => {
               }}
             />
 
-            {/* FTA Items */}
+            {/* Đại hội Items */}
             <div style={{ position: "relative" }}>
-              {filteredList.map((fta, idx) => {
+              {filteredList.map((daiHoi, idx) => {
                 const isLeft = idx % 2 === 0;
                 return (
                   <motion.div
-                    key={fta.ID}
+                    key={daiHoi.ID}
                     initial={{ opacity: 0, x: isLeft ? -50 : 50 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: idx * 0.05 }}
@@ -329,7 +287,7 @@ const FTATimeline: React.FC = () => {
                     {/* Card */}
                     <motion.div
                       whileHover={{ scale: 1.03, y: -3 }}
-                      onClick={() => setSelectedFTA(fta)}
+                      onClick={() => setSelectedDaiHoi(daiHoi)}
                       style={{
                         width: "45%",
                         minWidth: 300,
@@ -358,7 +316,7 @@ const FTATimeline: React.FC = () => {
                           boxShadow: "0 4px 12px rgba(184, 134, 11, 0.3)",
                         }}
                       >
-                        {getYear(fta.Signing_Date)}
+                        {daiHoi.Year}
                       </div>
 
                       <h3
@@ -370,7 +328,7 @@ const FTATimeline: React.FC = () => {
                           marginBottom: 12,
                         }}
                       >
-                        {fta.FTA_Name}
+                        {daiHoi.Name}
                       </h3>
 
                       <p
@@ -378,10 +336,11 @@ const FTATimeline: React.FC = () => {
                           color: "#8b5a00",
                           fontSize: 14,
                           lineHeight: 1.6,
-                          marginBottom: 16,
+                          marginBottom: 12,
+                          fontStyle: "italic",
                         }}
                       >
-                        {fta.Description}
+                        "{daiHoi.Theme}"
                       </p>
 
                       <div
@@ -389,39 +348,34 @@ const FTATimeline: React.FC = () => {
                           display: "flex",
                           gap: 8,
                           flexWrap: "wrap",
+                          marginTop: 12,
                         }}
                       >
-                        {fta.Topic && (
-                          <span
-                            style={{
-                              background: "linear-gradient(135deg, #ffe0b2, #ffecb3)",
-                              color: "#8b5a00",
-                              padding: "4px 12px",
-                              borderRadius: 6,
-                              fontSize: 12,
-                              fontWeight: 600,
-                              border: "1px solid #d4a574",
-                            }}
-                          >
-                            {fta.Topic}
-                          </span>
-                        )}
                         <span
                           style={{
-                            background:
-                              fta.Status === "Active"
-                                ? "linear-gradient(135deg, #d4f4dd, #c6f6d5)"
-                                : "linear-gradient(135deg, #fed7aa, #fde68a)",
-                            color:
-                              fta.Status === "Active" ? "#065f46" : "#92400e",
+                            background: "linear-gradient(135deg, #ffe0b2, #ffecb3)",
+                            color: "#8b5a00",
                             padding: "4px 12px",
                             borderRadius: 6,
                             fontSize: 12,
                             fontWeight: 600,
-                            border: fta.Status === "Active" ? "1px solid #6ee7b7" : "1px solid #fbbf24",
+                            border: "1px solid #d4a574",
                           }}
                         >
-                          {fta.Status}
+                          👤 {daiHoi.Leader}
+                        </span>
+                        <span
+                          style={{
+                            background: "linear-gradient(135deg, #d4f4dd, #c6f6d5)",
+                            color: "#065f46",
+                            padding: "4px 12px",
+                            borderRadius: 6,
+                            fontSize: 12,
+                            fontWeight: 600,
+                            border: "1px solid #6ee7b7",
+                          }}
+                        >
+                          📍 {daiHoi.Location}
                         </span>
                       </div>
                     </motion.div>
@@ -454,14 +408,14 @@ const FTATimeline: React.FC = () => {
 
       {/* Modal Popup */}
       <AnimatePresence>
-        {selectedFTA && (
+        {selectedDaiHoi && (
           <>
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setSelectedFTA(null)}
+              onClick={() => setSelectedDaiHoi(null)}
               style={{
                 position: "fixed",
                 top: 0,
@@ -505,7 +459,7 @@ const FTATimeline: React.FC = () => {
                   }}
                 >
                   <button
-                    onClick={() => setSelectedFTA(null)}
+                    onClick={() => setSelectedDaiHoi(null)}
                     style={{
                       position: "absolute",
                       top: 24,
@@ -541,12 +495,22 @@ const FTATimeline: React.FC = () => {
                       color: "#8b5a00",
                       fontSize: 28,
                       fontWeight: 700,
-                      marginBottom: 8,
+                      marginBottom: 12,
                       paddingRight: 50,
                     }}
                   >
-                    {selectedFTA.FTA_Name}
+                    {selectedDaiHoi.Name}
                   </h2>
+                  <p
+                    style={{
+                      color: "#8b5a00",
+                      fontSize: 16,
+                      fontStyle: "italic",
+                      marginBottom: 12,
+                    }}
+                  >
+                    "{selectedDaiHoi.Theme}"
+                  </p>
                   <div
                     style={{
                       display: "flex",
@@ -556,38 +520,30 @@ const FTATimeline: React.FC = () => {
                   >
                     <span
                       style={{
-                        background:
-                          selectedFTA.Status === "Active"
-                            ? "linear-gradient(135deg, #d4f4dd, #c6f6d5)"
-                            : "linear-gradient(135deg, #fed7aa, #fde68a)",
-                        color:
-                          selectedFTA.Status === "Active"
-                            ? "#065f46"
-                            : "#92400e",
+                        background: "linear-gradient(135deg, #d4f4dd, #c6f6d5)",
+                        color: "#065f46",
                         padding: "4px 12px",
                         borderRadius: 6,
                         fontSize: 13,
                         fontWeight: 600,
-                        border: selectedFTA.Status === "Active" ? "1px solid #6ee7b7" : "1px solid #fbbf24",
+                        border: "1px solid #6ee7b7",
                       }}
                     >
-                      {selectedFTA.Status}
+                      📅 {selectedDaiHoi.Year}
                     </span>
-                    {selectedFTA.Topic && (
-                      <span
-                        style={{
-                          background: "linear-gradient(135deg, #ffe0b2, #ffecb3)",
-                          color: "#8b5a00",
-                          padding: "4px 12px",
-                          borderRadius: 6,
-                          fontSize: 13,
-                          fontWeight: 600,
-                          border: "1px solid #d4a574",
-                        }}
-                      >
-                        {selectedFTA.Topic}
-                      </span>
-                    )}
+                    <span
+                      style={{
+                        background: "linear-gradient(135deg, #ffe0b2, #ffecb3)",
+                        color: "#8b5a00",
+                        padding: "4px 12px",
+                        borderRadius: 6,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        border: "1px solid #d4a574",
+                      }}
+                    >
+                      📍 {selectedDaiHoi.Location}
+                    </span>
                   </div>
                 </div>
 
@@ -602,34 +558,19 @@ const FTATimeline: React.FC = () => {
                   <div style={{ display: "grid", gap: 20 }}>
                     {[
                       {
-                        icon: "📅",
-                        label: "Ngày ký",
-                        value: selectedFTA.Signing_Date,
-                      },
-                      {
-                        icon: "✅",
-                        label: "Ngày có hiệu lực",
-                        value: selectedFTA.Effective_Date,
-                      },
-                      {
-                        icon: "🌏",
-                        label: "Thành viên",
-                        value: selectedFTA.Members,
-                      },
-                      {
-                        icon: "🇻🇳",
-                        label: "Vai trò VN",
-                        value: selectedFTA.VN_Role,
-                      },
-                      {
-                        icon: "💼",
-                        label: "Lợi ích",
-                        value: selectedFTA.Benefits,
+                        icon: "👤",
+                        label: "Lãnh đạo",
+                        value: selectedDaiHoi.Leader,
                       },
                       {
                         icon: "📝",
-                        label: "Mô tả",
-                        value: selectedFTA.Description,
+                        label: "Nội dung",
+                        value: selectedDaiHoi.Description,
+                      },
+                      {
+                        icon: "⭐",
+                        label: "Ý nghĩa lịch sử",
+                        value: selectedDaiHoi.Significance,
                       },
                     ].map(
                       (item, i) =>
@@ -666,41 +607,6 @@ const FTATimeline: React.FC = () => {
                             </div>
                           </div>
                         )
-                    )}
-
-                    {selectedFTA.Link && (
-                      <a
-                        href={selectedFTA.Link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: "block",
-                          background:
-                            "linear-gradient(135deg, #d4a574 0%, #b8860b 100%)",
-                          color: "#fff",
-                          padding: 16,
-                          borderRadius: 12,
-                          textAlign: "center",
-                          textDecoration: "none",
-                          fontWeight: 600,
-                          fontSize: 15,
-                          border: "2px solid #cd7f32",
-                          boxShadow: "0 4px 12px rgba(184, 134, 11, 0.3)",
-                          transition: "all 0.3s",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = "translateY(-2px)";
-                          e.currentTarget.style.boxShadow =
-                            "0 6px 20px rgba(184, 134, 11, 0.5)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = "translateY(0)";
-                          e.currentTarget.style.boxShadow =
-                            "0 4px 12px rgba(184, 134, 11, 0.3)";
-                        }}
-                      >
-                        🔗 Xem nguồn tham khảo
-                      </a>
                     )}
                   </div>
                 </div>

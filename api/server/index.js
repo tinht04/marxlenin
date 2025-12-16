@@ -193,15 +193,17 @@ io.on("connection", (socket) => {
   socket.on("create-game", ({ hostName, gameSettings }) => {
     const gameId = generateGameId();
     
-    const { teamCount, questionCount, timePerQuestion } = gameSettings;
+    const { teamCount, questionCount, timePerQuestion, gameMode = "team" } = gameSettings;
     
-    // Create teams
-    const teams = Array.from({ length: teamCount }, (_, i) => ({
-      name: `Nhóm ${i + 1}`,
-      index: i,
-      score: 0,
-      players: []
-    }));
+    // Create teams (only for team mode)
+    const teams = gameMode === "team" 
+      ? Array.from({ length: teamCount }, (_, i) => ({
+          name: `Nhóm ${i + 1}`,
+          index: i,
+          score: 0,
+          players: []
+        }))
+      : []; // No teams in individual mode
 
     const game = {
       id: gameId,
@@ -213,7 +215,8 @@ io.on("connection", (socket) => {
       settings: {
         teamCount,
         questionCount,
-        timePerQuestion
+        timePerQuestion,
+        gameMode
       },
       currentQuestion: 0,
       questions: [],
@@ -297,20 +300,29 @@ io.on("connection", (socket) => {
     game.questions = selectedQuestions;
     
 
-    // Auto-assign only waiting players (teamIndex === -1) to teams in round-robin fashion
+    // Auto-assign players based on game mode
     const waitingPlayers = game.players.filter(p => p.teamIndex === -1);
     const shuffledPlayers = [...waitingPlayers].sort(() => Math.random() - 0.5);
-    shuffledPlayers.forEach((player, index) => {
-      const teamIndex = index % game.settings.teamCount;
-      player.teamIndex = teamIndex;
-      
-      // Make sure team exists before pushing
-      if (!game.teams[teamIndex]) {
-        return;
-      }
-      
-      game.teams[teamIndex].players.push(player);
-    });
+    
+    if (game.settings.gameMode === "team") {
+      // Team mode: assign players to teams in round-robin fashion
+      shuffledPlayers.forEach((player, index) => {
+        const teamIndex = index % game.settings.teamCount;
+        player.teamIndex = teamIndex;
+        
+        // Make sure team exists before pushing
+        if (!game.teams[teamIndex]) {
+          return;
+        }
+        
+        game.teams[teamIndex].players.push(player);
+      });
+    } else {
+      // Individual mode: all players have teamIndex 0 (no actual teams)
+      shuffledPlayers.forEach((player) => {
+        player.teamIndex = 0;
+      });
+    }
 
     game.phase = "playing";
     game.currentQuestion = 0;
@@ -322,26 +334,47 @@ io.on("connection", (socket) => {
     const game = games.get(gameId);
     if (!game) return;
 
-    const team = game.teams[teamIndex];
-    if (team) {
-      team.score += points;
+    // Update individual player's score
+    const player = game.players.find((p) => p.id === socket.id);
+    if (player) {
+      if (!player.score) player.score = 0;
+      player.score += points;
+    }
 
-      // Also update the individual player's score (if we can find them by socket id)
-      const player = game.players.find((p) => p.id === socket.id);
-      if (player) {
-        if (!player.score) player.score = 0;
-        player.score += points;
+    if (game.settings.gameMode === "team") {
+      // Team mode: update team score
+      const team = game.teams[teamIndex];
+      if (team) {
+        team.score += points;
       }
 
-      // Broadcast updated scores including per-player scores so clients can render leaderboards
+      // Broadcast team scores
       io.to(gameId).emit("scores-updated", {
         teams: game.teams.map((t, idx) => ({
           name: t.name,
           index: idx,
           score: t.score,
           playerCount: t.players.length,
-          players: t.players.map(p => ({ name: p.name, score: p.score || 0 }))
+          players: t.players.map(p => {
+            const actualPlayer = game.players.find(gp => gp.id === p.id);
+            return { name: p.name, score: actualPlayer?.score || 0 };
+          })
         }))
+      });
+    } else {
+      // Individual mode: broadcast individual player scores
+      const sortedPlayers = [...game.players]
+        .map(p => ({ name: p.name, score: p.score || 0 }))
+        .sort((a, b) => b.score - a.score);
+      
+      io.to(gameId).emit("scores-updated", {
+        teams: [{
+          name: "Individual",
+          index: 0,
+          score: 0,
+          playerCount: game.players.length,
+          players: sortedPlayers
+        }]
       });
     }
   });
@@ -399,6 +432,15 @@ io.on("connection", (socket) => {
     
     if (game.currentQuestion >= game.questions.length) {
       game.phase = "finished";
+      
+      // Update team.players scores before sending
+      game.teams.forEach(team => {
+        team.players = team.players.map(playerInfo => {
+          const actualPlayer = game.players.find(p => p.name === playerInfo.name);
+          return { name: playerInfo.name, score: actualPlayer ? actualPlayer.score : playerInfo.score };
+        });
+      });
+      
       io.to(gameId).emit("game-finished", game);
     } else {
       io.to(gameId).emit("question-changed", {
@@ -529,7 +571,10 @@ io.on("connection", (socket) => {
         index: t.index,
         score: t.score,
         playerCount: t.players.length,
-        players: t.players.map(p => ({ name: p.name, score: p.score }))
+        players: t.players.map(p => {
+          const actualPlayer = game.players.find(pl => pl.name === p.name);
+          return { name: p.name, score: actualPlayer ? actualPlayer.score : p.score };
+        })
       }))
     };
     

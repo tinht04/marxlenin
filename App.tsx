@@ -88,7 +88,7 @@ const App: React.FC = () => {
           {
             role: "model",
             content:
-              "Xin chào, tôi là trợ lý của MarxLeninEdu. Tôi giúp gì cho bạn?",
+              "Xin chào, tôi là trợ lý AI. Tôi giúp gì cho bạn?",
           },
         ]);
         // Navigation handled by router

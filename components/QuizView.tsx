@@ -219,7 +219,7 @@ export const QuizView: React.FC = () => {
     return (
       <div className="max-w-2xl mx-auto text-center bg-white p-8 rounded-xl shadow-md border">
         <h2 className="text-2xl font-bold text-blue-800 mb-4">
-          Trắc nghiệm Hội nhập 4.0
+          Trắc nghiệm Kiến thức Lịch sử Đảng
         </h2>
         <p className="text-gray-600 mb-6">
           Chọn một chế độ để kiểm tra kiến thức của bạn!

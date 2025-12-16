@@ -31,6 +31,7 @@ interface GameSettings {
   teamCount: number;
   questionCount: number;
   timePerQuestion: number;
+  gameMode: "team" | "individual";
 }
 
 interface GameState {
@@ -50,6 +51,7 @@ export const MultiplayerGame: React.FC = () => {
   const [gameId, setGameId] = useState("");
   const [playerName, setPlayerName] = useState("");
   const [hostName, setHostName] = useState("");
+  const [gameMode, setGameMode] = useState<"team" | "individual">("team");
   const [teamCount, setTeamCount] = useState(4);
   const [questionCount, setQuestionCount] = useState(15);
   const [timePerQuestion, setTimePerQuestion] = useState(30);
@@ -641,9 +643,10 @@ export const MultiplayerGame: React.FC = () => {
     socket.emit("create-game", {
       hostName: hostName.trim(),
       gameSettings: {
-        teamCount,
+        teamCount: gameMode === "individual" ? 1 : teamCount,
         questionCount,
-        timePerQuestion
+        timePerQuestion,
+        gameMode
       }
     });
   };
@@ -844,8 +847,8 @@ export const MultiplayerGame: React.FC = () => {
   const renderHome = () => (
     <div className="multiplayer-home">
       <div className="hero-section">
-        <h1 className="game-title">Hội Nhập Kinh Tế Quiz</h1>
-        <p className="game-subtitle">Thi đua theo nhóm - Realtime</p>
+        <h1 className="game-title">Trò chơi trực tuyến</h1>
+        <p className="game-subtitle">Cạch tranh theo thời gian thực</p>
       </div>
 
       <div className="action-cards">
@@ -883,20 +886,44 @@ export const MultiplayerGame: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <label>Số lượng nhóm: {teamCount}</label>
-          <input
-            type="range"
-            min="2"
-            max="8"
-            value={teamCount}
-            onChange={(e) => setTeamCount(parseInt(e.target.value))}
-            className="slider"
-          />
-          <div className="slider-labels">
-            <span>2 nhóm</span>
-            <span>8 nhóm</span>
+          <label>Chế độ chơi</label>
+          <div className="game-mode-selector">
+            <button
+              className={`mode-button ${gameMode === "team" ? "active" : ""}`}
+              onClick={() => setGameMode("team")}
+            >
+              <span className="mode-icon">👥</span>
+              <span className="mode-name">Theo Nhóm</span><br />
+              <span className="mode-desc">Chia đội và tính điểm theo nhóm</span>
+            </button>
+            <button
+              className={`mode-button ${gameMode === "individual" ? "active" : ""}`}
+              onClick={() => setGameMode("individual")}
+            >
+              <span className="mode-icon">🏃</span>
+              <span className="mode-name">Cá Nhân</span><br />
+              <span className="mode-desc">Mỗi người chơi tự tính điểm</span>
+            </button>
           </div>
         </div>
+
+        {gameMode === "team" && (
+          <div className="form-group">
+            <label>Số lượng nhóm: {teamCount}</label>
+            <input
+              type="range"
+              min="2"
+              max="8"
+              value={teamCount}
+              onChange={(e) => setTeamCount(parseInt(e.target.value))}
+              className="slider"
+            />
+            {/* <div className="slider-labels">
+              <span>2 nhóm</span>
+              <span>8 nhóm</span>
+            </div> */}
+          </div>
+        )}
 
         <div className="form-group">
           <label>Số câu hỏi: {questionCount}</label>
@@ -908,10 +935,10 @@ export const MultiplayerGame: React.FC = () => {
             onChange={(e) => setQuestionCount(parseInt(e.target.value))}
             className="slider"
           />
-          <div className="slider-labels">
+          {/* <div className="slider-labels">
             <span>10 câu</span>
             <span>30 câu</span>
-          </div>
+          </div> */}
         </div>
 
         <div className="form-group">
@@ -925,19 +952,25 @@ export const MultiplayerGame: React.FC = () => {
             onChange={(e) => setTimePerQuestion(parseInt(e.target.value))}
             className="slider"
           />
-          <div className="slider-labels">
+          {/* <div className="slider-labels">
             <span>10s</span>
             <span>60s</span>
-          </div>
+          </div> */}
         </div>
 
         <div className="settings-preview">
           <h3>📝 Tóm tắt:</h3>
           <ul>
-            <li>👥 {teamCount} nhóm thi đấu</li>
+            {gameMode === "team" ? (
+              <>
+                <li>👥 {teamCount} nhóm thi đấu</li>
+                <li>🎯 Tự động phân nhóm ngẫu nhiên</li>
+              </>
+            ) : (
+              <li>🏃 Chơi cá nhân - tính điểm riêng</li>
+            )}
             <li>❓ {questionCount} câu hỏi</li>
             <li>⏱️ {timePerQuestion} giây/câu</li>
-            <li>🎯 Tự động phân nhóm ngẫu nhiên</li>
           </ul>
         </div>
 
@@ -1007,11 +1040,13 @@ export const MultiplayerGame: React.FC = () => {
             <div className="stat-value">{gameState.players.length}</div>
             <div className="stat-label">Người chơi</div>
           </div>
-          <div className="stat-card">
-            <div className="stat-icon">🏆</div>
-            <div className="stat-value">{gameState.settings.teamCount}</div>
-            <div className="stat-label">Nhóm</div>
-          </div>
+          {gameState.settings.gameMode === "team" && (
+            <div className="stat-card">
+              <div className="stat-icon">🏆</div>
+              <div className="stat-value">{gameState.settings.teamCount}</div>
+              <div className="stat-label">Nhóm</div>
+            </div>
+          )}
           <div className="stat-card">
             <div className="stat-icon">❓</div>
             <div className="stat-value">{gameState.settings.questionCount}</div>
@@ -1037,7 +1072,11 @@ export const MultiplayerGame: React.FC = () => {
         </div>
 
         <div className="lobby-info">
-          <p>Khi bắt đầu, tất cả người chơi sẽ được phân ngẫu nhiên vào {gameState.settings.teamCount} nhóm</p>
+          {gameState.settings.gameMode === "team" ? (
+            <p>Khi bắt đầu, tất cả người chơi sẽ được phân ngẫu nhiên vào {gameState.settings.teamCount} nhóm</p>
+          ) : (
+            <p>🏃 Chế độ cá nhân - Mỗi người chơi thi đấu riêng và tự tính điểm</p>
+          )}
         </div>
 
         <div className="lobby-actions">
@@ -1069,13 +1108,8 @@ export const MultiplayerGame: React.FC = () => {
   const renderHostView = () => {
     if (!gameState) return null;
 
-    // Calculate team scores for leaderboard
-    const scores = gameState.teams.map((team, idx) => ({
-      index: idx,
-      name: team.name,
-      score: team.score,
-      playerCount: team.players.length
-    }));
+    const isIndividualMode = gameState.settings.gameMode === "individual";
+    const realtimeScores = [...scores].sort((a, b) => b.score - a.score);
 
     return (
       <div className="host-view">
@@ -1089,16 +1123,28 @@ export const MultiplayerGame: React.FC = () => {
         <div className="leaderboard">
           <h3>🏆 Bảng Xếp Hạng Trực Tiếp</h3>
           <div className="teams-ranking">
-            {scores.sort((a, b) => b.score - a.score).map((team, idx) => (
-              <div key={team.index} className={`rank-item rank-${idx + 1}`}>
-                <div className="rank-number">#{idx + 1}</div>
-                <div className="team-info-rank">
-                  <div className="team-name-rank">{team.name}</div>
-                  <div className="team-members">{team.playerCount} thành viên</div>
+            {isIndividualMode ? (
+              realtimeScores[0]?.players?.map((player, idx) => (
+                <div key={idx} className={`rank-item rank-${idx + 1}`}>
+                  <div className="rank-number">#{idx + 1}</div>
+                  <div className="team-info-rank">
+                    <div className="team-name-rank">👤 {player.name}</div>
+                  </div>
+                  <div className="team-score-rank">{player.score}</div>
                 </div>
-                <div className="team-score-rank">{team.score}</div>
-              </div>
-            ))}
+              ))
+            ) : (
+              realtimeScores.map((team, idx) => (
+                <div key={team.index} className={`rank-item rank-${idx + 1}`}>
+                  <div className="rank-number">#{idx + 1}</div>
+                  <div className="team-info-rank">
+                    <div className="team-name-rank">{team.name}</div>
+                    <div className="team-members">{team.playerCount} thành viên</div>
+                  </div>
+                  <div className="team-score-rank">{team.score}</div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -1117,6 +1163,7 @@ export const MultiplayerGame: React.FC = () => {
   const renderWaitingResults = () => {
     if (!gameState) return null;
 
+    const isIndividualMode = gameState.settings.gameMode === "individual";
     const sortedScores = [...scores].sort((a, b) => b.score - a.score);
 
     return (
@@ -1136,22 +1183,37 @@ export const MultiplayerGame: React.FC = () => {
         <div className="leaderboard">
           <h3>🏆 Bảng Xếp Hạng Trực Tiếp</h3>
           <div className="teams-ranking">
-            {sortedScores.map((team, idx) => (
-              <div 
-                key={team.index} 
-                className={`rank-item rank-${idx + 1} ${team.index === myTeamIndex ? 'my-team-highlight' : ''}`}
-              >
-                <div className="rank-number">#{idx + 1}</div>
-                <div className="team-info-rank">
-                  <div className="team-name-rank">
-                    {team.name}
-                    {team.index === myTeamIndex && ' ⭐'}
+            {isIndividualMode ? (
+              sortedScores[0]?.players?.map((player, idx) => (
+                <div 
+                  key={idx} 
+                  className={`rank-item rank-${idx + 1} ${player.name === playerName ? 'my-team-highlight' : ''}`}
+                >
+                  <div className="rank-number">#{idx + 1}</div>
+                  <div className="team-info-rank">
+                    <div className="team-name-rank">👤 {player.name}</div>
                   </div>
-                  <div className="team-members">{team.playerCount} thành viên</div>
+                  <div className="team-score-rank">{player.score}</div>
                 </div>
-                <div className="team-score-rank">{team.score}</div>
-              </div>
-            ))}
+              ))
+            ) : (
+              sortedScores.map((team, idx) => (
+                <div 
+                  key={team.index} 
+                  className={`rank-item rank-${idx + 1} ${team.index === myTeamIndex ? 'my-team-highlight' : ''}`}
+                >
+                  <div className="rank-number">#{idx + 1}</div>
+                  <div className="team-info-rank">
+                    <div className="team-name-rank">
+                      {team.name}
+                      {team.index === myTeamIndex && ' ⭐'}
+                    </div>
+                    <div className="team-members">{team.playerCount} thành viên</div>
+                  </div>
+                  <div className="team-score-rank">{team.score}</div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -1166,16 +1228,24 @@ export const MultiplayerGame: React.FC = () => {
     if (!question) return null;
 
     const shuffledQ = getShuffledQuestion(question);
-    const myTeam = gameState.teams[myTeamIndex];
+    const isIndividualMode = gameState?.settings?.gameMode === "individual";
+    const myTeam = !isIndividualMode ? gameState.teams[myTeamIndex] : null;
 
     return (
       <div className="playing">
         <div className="game-header">
-          <div className="team-badge">
-            <span className="team-label">Nhóm:</span>
-            <span className="team-name-badge">{myTeam.name}</span>
-            <span className="my-score-badge">💎 {myScore} điểm</span>
-          </div>
+          {!isIndividualMode && myTeam ? (
+            <div className="team-badge">
+              <span className="team-label">Nhóm:</span>
+              <span className="team-name-badge">{myTeam.name}</span>
+              <span className="my-score-badge">💎 {myTeam.score} điểm</span>
+            </div>
+          ) : (
+            <div className="team-badge">
+              <span className="team-label">👤 {playerName}</span>
+              <span className="my-score-badge">💎 {myScore} điểm</span>
+            </div>
+          )}
           <div className={`timer ${timeLeft <= 5 ? 'urgent' : ''}`}>
             ⏱️ {timeLeft}s
           </div>
@@ -1187,27 +1257,19 @@ export const MultiplayerGame: React.FC = () => {
           </span>
         </div>
 
-        <div className="team-players-list">
-          <h4>👥 Thành viên:</h4>
-          <div className="teammates">
-            {myTeam.players.map((player, idx) => (
-              <span key={idx} className={`teammate ${player.name === playerName ? 'me' : ''}`}>
-                {player.name === playerName && '⭐ '}
-                {player.name}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="mini-scoreboard">
-          {scores.slice(0, 3).map((team, idx) => (
-            <div key={team.index} className={`mini-score-item ${team.index === myTeamIndex ? 'my-team' : ''}`}>
-              <span className="mini-rank">#{idx + 1}</span>
-              <span className="mini-team">{team.name}</span>
-              <span className="mini-score">{team.score}</span>
+        {!isIndividualMode && myTeam && (
+          <div className="team-players-list">
+            <h4>👥 Thành viên:</h4>
+            <div className="teammates">
+              {myTeam.players.map((player, idx) => (
+                <span key={idx} className={`teammate ${player.name === playerName ? 'me' : ''}`}>
+                  {player.name === playerName && '⭐ '}
+                  {player.name}
+                </span>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
 
         <div className={`question-container ${questionTransition ? 'fade-out' : 'fade-in'}`}>
           <h2 className="question-text">{shuffledQ.question}</h2>
@@ -1267,11 +1329,72 @@ export const MultiplayerGame: React.FC = () => {
   };
 
   const renderResults = () => {
+    const isIndividualMode = gameState?.settings?.gameMode === "individual";
+    
+    if (isIndividualMode) {
+      const allPlayers = scores[0]?.players || [];
+      const playerList = allPlayers.length > 0 
+        ? allPlayers 
+        : (gameState?.players || []).map(p => ({ name: p.name, score: p.score || 0 })).sort((a, b) => b.score - a.score);
+      
+      return (
+        <div className="results">
+          <h1 className="results-title">🏆 Kết Quả - Chế độ Cá Nhân</h1>
+
+          {playerList.length > 0 ? (
+            <>
+              <div className="podium">
+                {playerList.slice(0, 3).map((player, idx) => (
+                  <div key={idx} className={`podium-place place-${idx + 1}`}>
+                    <div className="medal">
+                      {idx === 0 && '🥇'}
+                      {idx === 1 && '🥈'}
+                      {idx === 2 && '🥉'}
+                    </div>
+                    <div className="team-info">
+                      <h3>👤 {player.name}</h3>
+                      <p className="score">{player.score} điểm</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="full-rankings">
+                <h3>Bảng Xếp Hạng Đầy Đủ</h3>
+                {playerList.slice(3).map((player, idx) => (
+                  <div key={idx} className="ranking-item">
+                    <div className="ranking-header">
+                      <span className="rank">#{idx + 4}</span>
+                      <span className="team-name">👤 {player.name}</span>
+                      <span className="team-score">{player.score} điểm</span>
+                    </div>
+                  </div>
+                ))}
+                {playerList.length <= 3 && (
+                  <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                    Không có người chơi khác
+                  </p>
+                )}
+              </div>
+            </>
+          ) : (
+            <p style={{ textAlign: 'center', color: '#fff', padding: '2rem' }}>
+              Chưa có dữ liệu xếp hạng
+            </p>
+          )}
+
+          <button onClick={resetGame} className="primary-button">
+            Về Trang Chủ
+          </button>
+        </div>
+      );
+    }
+
     const sortedScores = [...scores].sort((a, b) => b.score - a.score);
 
     return (
       <div className="results">
-        <h1 className="results-title">🏆 Kết Quả</h1>
+        <h1 className="results-title">🏆 Kết Quả - Chế độ Nhóm</h1>
 
         <div className="podium">
           {sortedScores.slice(0, 3).map((team, idx) => (
@@ -1548,7 +1671,7 @@ export const MultiplayerGame: React.FC = () => {
 
         .back-button {
           background: rgba(255,255,255,0.2);
-          color: white;
+          color: #8b5a00;
           border: 2px solid white;
           padding: 0.8rem 1.5rem;
           border-radius: 10px;
@@ -2449,6 +2572,75 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         /* New styles for updated features */
+        .game-mode-selector {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .mode-button {
+          background: rgba(255, 255, 255, 0.05);
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          border-radius: 12px;
+          padding: 1rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-align: center;
+        }
+
+        .mode-button:hover {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 193, 7, 0.5);
+        }
+
+        .mode-button.active {
+          background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 152, 0, 0.2));
+          border-color: #ffc107;
+        }
+
+        .mode-icon {
+          font-size: 2rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .mode-name {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: #8b5a00;
+          margin-bottom: 0.25rem;
+        }
+
+        .mode-desc {
+          font-size: 0.85rem;
+          color: #8b5a00;
+
+        /* Compact UI styles */
+        .game-header {
+          padding: 0.8rem 1.5rem;
+        }
+
+        .question-container {
+          padding: 1rem;
+        }
+
+        .question-text {
+          font-size: 1.3rem;
+          margin-bottom: 1rem;
+        }
+
+        .team-players-list li {
+          padding: 0.4rem 0.6rem;
+        }
+
+        .answers-grid {
+          gap: 0.7rem;
+        }
+
+        .answer-option {
+          padding: 0.8rem 1rem;
+        }
+
         .slider {
           width: 100%;
           height: 8px;

@@ -35,11 +35,11 @@ export const Header: React.FC<HeaderProps> = ({ hasPdf }) => {
           <div className="flex items-center gap-3">
             <img 
               src="/img/logo.png" 
-              alt="MarxLeninEdu Logo" 
+              alt="Lịch sử Đảng Việt Nam Logo" 
               className="h-12 w-12 object-contain"
             />
             <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-800 via-orange-700 to-amber-800 bg-clip-text text-transparent tracking-tight">
-              MarxLeninEdu
+              Lịch sử Đảng Việt Nam
             </h1>
           </div>
         </div>
@@ -53,7 +53,7 @@ export const Header: React.FC<HeaderProps> = ({ hasPdf }) => {
           >
             Game Multiplayer
           </Link>
-          <Link
+          {/* <Link
             to="/mini-games"
             className={`${navItemClasses} ${
               location.pathname === "/mini-games" ? activeClasses : inactiveClasses
@@ -70,7 +70,7 @@ export const Header: React.FC<HeaderProps> = ({ hasPdf }) => {
             aria-current={location.pathname === "/map" ? "page" : undefined}
           >
             Bản đồ Hội nhập
-          </Link>
+          </Link> */}
           <Link
             to="/quiz"
             className={`${navItemClasses} ${
@@ -87,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({ hasPdf }) => {
             }`}
             aria-current={location.pathname === "/fta" ? "page" : undefined}
           >
-            FTA Timeline
+            Timeline
           </Link>
           <Link
             to={hasPdf ? "/chat" : "#"}
@@ -104,7 +104,7 @@ export const Header: React.FC<HeaderProps> = ({ hasPdf }) => {
           >
             Chatbot
           </Link>
-          <Link
+          {/* <Link
             to="/blog"
             className={`${navItemClasses} ${
               location.pathname === "/blog" ? activeClasses : inactiveClasses
@@ -112,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({ hasPdf }) => {
             aria-current={location.pathname === "/blog" ? "page" : undefined}
           >
             Blog
-          </Link>
+          </Link> */}
         </nav>
       </div>
     </header>
