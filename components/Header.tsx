@@ -90,6 +90,15 @@ export const Header: React.FC<HeaderProps> = ({ hasPdf }) => {
             Timeline
           </Link>
           <Link
+            to="/video"
+            className={`${navItemClasses} ${
+              location.pathname === "/video" ? activeClasses : inactiveClasses
+            }`}
+            aria-current={location.pathname === "/video" ? "page" : undefined}
+          >
+            Video
+          </Link>
+          <Link
             to={hasPdf ? "/chat" : "#"}
             className={`${navItemClasses} ${
               location.pathname === "/chat"

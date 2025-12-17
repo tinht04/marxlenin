@@ -15,6 +15,7 @@ import BlogView from "./components/BlogView";
 import BlogDetail from "./components/BlogDetail";
 import { MultiplayerGame } from "./components/MultiplayerGame";
 import { IntegrationGame } from "./components/IntegrationGame";
+import { VideoView } from "./components/VideoView";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 const LOCAL_STORAGE_KEY = "pdfChatData";
@@ -67,7 +68,7 @@ const App: React.FC = () => {
   // the pre-provided file instead of requiring user upload.
   useEffect(() => {
     const loadStaticPdf = async () => {
-      const staticPath = "/docs/giao-trinh-kinh-te-chinh-tri-mac-lenin.pdf";
+      const staticPath = "/docs/giao-trinh-lich-su-dang-cong-san-viet-nam-bo-gdampdt-ctqg-2021_compress.pdf";
       try {
         setStatus("processing");
         const resp = await fetch(staticPath);
@@ -77,7 +78,7 @@ const App: React.FC = () => {
         const blob = await resp.blob();
         const file = new File(
           [blob],
-          "giao-trinh-kinh-te-chinh-tri-mac-lenin.pdf",
+          "giao-trinh-lich-su-dang-cong-san-viet-nam-bo-gdampdt-ctqg-2021_compress.pdf",
           { type: "application/pdf" }
         );
         setPdfFile(file);
@@ -201,6 +202,7 @@ const App: React.FC = () => {
             <Route path="/map" element={<IntegrationMap />} />
             <Route path="/quiz" element={<QuizView />} />
             <Route path="/timeline" element={<FTATimeline />} />
+            <Route path="/video" element={<VideoView />} />
             <Route path="/blog" element={<BlogView />} />
             <Route path="/blog/:id" element={<BlogDetail />} />
             <Route
