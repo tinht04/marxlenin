@@ -81,11 +81,11 @@ export const Header: React.FC<HeaderProps> = ({ hasPdf }) => {
             Quizzz
           </Link>
           <Link
-            to="/fta"
+            to="/timeline"
             className={`${navItemClasses} ${
-              location.pathname === "/fta" ? activeClasses : inactiveClasses
+              location.pathname === "/timeline" ? activeClasses : inactiveClasses
             }`}
-            aria-current={location.pathname === "/fta" ? "page" : undefined}
+            aria-current={location.pathname === "/timeline" ? "page" : undefined}
           >
             Timeline
           </Link>

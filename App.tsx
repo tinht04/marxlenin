@@ -200,7 +200,7 @@ const App: React.FC = () => {
             <Route path="/mini-games" element={<IntegrationGame />} />
             <Route path="/map" element={<IntegrationMap />} />
             <Route path="/quiz" element={<QuizView />} />
-            <Route path="/fta" element={<FTATimeline />} />
+            <Route path="/timeline" element={<FTATimeline />} />
             <Route path="/blog" element={<BlogView />} />
             <Route path="/blog/:id" element={<BlogDetail />} />
             <Route

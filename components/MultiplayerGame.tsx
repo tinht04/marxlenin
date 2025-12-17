@@ -861,7 +861,7 @@ export const MultiplayerGame: React.FC = () => {
         <div className="action-card" onClick={() => setPhase("join")}>
           <div className="card-icon">🚀</div>
           <h3>Tham Gia Game</h3>
-          <p>Nhập mã game để chơi cùng nhóm</p>
+          <p>Nhập mã game để chơi cùng bạn bè</p>
         </div>
       </div>
     </div>
