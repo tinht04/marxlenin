@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
           © {new Date().getFullYear()} Lịch sử Đảng — Tất cả quyền được bảo lưu.
         </p>
         <p className="text-sm font-medium bg-gradient-to-r from-amber-800 via-orange-700 to-amber-800 bg-clip-text text-transparent">
-          {/* <a href="https://docs.google.com/document/d/1ajxDx53XqQaDr2ZF1004vdnHJJ-zbpPX5IDoBd9RqDE/edit?usp=sharing" target="_blank" rel="noopener noreferrer"> Phụ lục sử dụng tài liệu và AI.</a> */}
+          <a href="https://docs.google.com/document/d/1ajxDx53XqQaDr2ZF1004vdnHJJ-zbpPX5IDoBd9RqDE/edit?usp=sharing" target="_blank" rel="noopener noreferrer"> Phụ lục sử dụng tài liệu và AI.</a>
          
         </p>
       </div>

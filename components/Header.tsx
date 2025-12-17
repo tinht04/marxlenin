@@ -78,7 +78,7 @@ export const Header: React.FC<HeaderProps> = ({ hasPdf }) => {
             }`}
             aria-current={location.pathname === "/quiz" ? "page" : undefined}
           >
-            Quizzz
+            Quiz
           </Link>
           <Link
             to="/timeline"
