@@ -790,11 +790,12 @@ export const MultiplayerGame: React.FC = () => {
       clearGameSession();
       
       // Notify server that player finished with final score
+      // Use ref to get the latest score value (state may be stale)
       if (socket && gameId) {
         socket.emit("player-finished", { 
           gameId, 
           playerId: socket.id,
-          finalScore: myScore,
+          finalScore: myScoreRef.current,
           teamIndex: myTeamIndex
         });
       }
