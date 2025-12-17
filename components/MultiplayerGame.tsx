@@ -2880,50 +2880,115 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .leaderboard {
-          background: white;
-          padding: 2rem;
-          border-radius: 15px;
+          background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+          padding: 2.5rem;
+          border-radius: 20px;
           margin-bottom: 2rem;
-          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+          box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+          border: 2px solid rgba(102, 126, 234, 0.1);
         }
 
         .leaderboard h3 {
           color: #667eea;
-          margin-bottom: 1.5rem;
+          margin-bottom: 2rem;
           text-align: center;
-          font-size: 1.8rem;
+          font-size: 2rem;
+          font-weight: bold;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
         }
 
         .teams-ranking {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 1.2rem;
         }
 
         .rank-item {
           display: flex;
           align-items: center;
-          padding: 1.5rem;
-          border-radius: 10px;
-          background: #f8f9fa;
-          transition: all 0.3s ease;
+          padding: 1.5rem 1.8rem;
+          border-radius: 15px;
+          background: white;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          border: 2px solid transparent;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .rank-item::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 5px;
+          background: #667eea;
+          opacity: 0;
+          transition: opacity 0.3s ease;
         }
 
         .rank-item:hover {
-          transform: translateX(10px);
-          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+          transform: translateX(8px) scale(1.02);
+          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+          border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .rank-item:hover::before {
+          opacity: 1;
         }
 
         .rank-1 {
           background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+          border: 2px solid #f4c430;
+          box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+          transform: scale(1.05);
+        }
+
+        .rank-1::after {
+          content: '👑';
+          position: absolute;
+          right: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 2.5rem;
+          opacity: 0.3;
         }
 
         .rank-2 {
-          background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+          background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
+          border: 2px solid #d0d0d0;
+          box-shadow: 0 8px 25px rgba(192, 192, 192, 0.4);
+          transform: scale(1.03);
+        }
+
+        .rank-2::after {
+          content: '🥈';
+          position: absolute;
+          right: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 2rem;
+          opacity: 0.3;
         }
 
         .rank-3 {
           background: linear-gradient(135deg, #cd7f32 0%, #e8a87c 100%);
+          border: 2px solid #b8722e;
+          box-shadow: 0 8px 25px rgba(205, 127, 50, 0.4);
+          transform: scale(1.01);
+        }
+
+        .rank-3::after {
+          content: '🥉';
+          position: absolute;
+          right: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 2rem;
+          opacity: 0.3;
         }
 
         /* Waiting Results Styles */
@@ -2978,15 +3043,41 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .my-team-highlight {
-          background: linear-gradient(135deg, #d4a574 0%, #b8860b 100%) !important;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          border: 2px solid #5568d3 !important;
+          box-shadow: 0 10px 35px rgba(102, 126, 234, 0.5) !important;
+          animation: highlightPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes highlightPulse {
+          0%, 100% {
+            box-shadow: 0 10px 35px rgba(102, 126, 234, 0.5);
+          }
+          50% {
+            box-shadow: 0 15px 45px rgba(102, 126, 234, 0.7);
+          }
+        }
+
+        .my-team-highlight::before {
+          opacity: 0 !important;
+        }
+
+        .my-team-highlight .rank-number {
+          color: white !important;
+          background: rgba(255, 255, 255, 0.3) !important;
+        }
+
+        .my-team-highlight .team-name-rank {
           color: white !important;
         }
 
-        .my-team-highlight .rank-number,
-        .my-team-highlight .team-name-rank,
-        .my-team-highlight .team-members,
+        .my-team-highlight .team-members {
+          color: rgba(255, 255, 255, 0.9) !important;
+        }
+
         .my-team-highlight .team-score-rank {
           color: white !important;
+          background: rgba(255, 255, 255, 0.25) !important;
         }
 
         .rank-3 {
@@ -2994,48 +3085,107 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .rank-number {
-          font-size: 2rem;
-          font-weight: bold;
+          font-size: 2.5rem;
+          font-weight: 800;
           color: #667eea;
-          width: 60px;
+          width: 70px;
+          text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 70px;
+          border-radius: 50%;
+          background: rgba(102, 126, 234, 0.1);
+          margin-right: 1rem;
+          flex-shrink: 0;
         }
 
-        .rank-1 .rank-number,
-        .rank-2 .rank-number,
+        .rank-1 .rank-number {
+          color: #b8860b;
+          background: rgba(255, 215, 0, 0.3);
+          font-size: 3rem;
+        }
+
+        .rank-2 .rank-number {
+          color: #696969;
+          background: rgba(192, 192, 192, 0.4);
+          font-size: 2.8rem;
+        }
+
         .rank-3 .rank-number {
-          color: #333;
+          color: #8b4513;
+          background: rgba(205, 127, 50, 0.3);
+          font-size: 2.6rem;
         }
 
         .team-info-rank {
           flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 0.3rem;
+          min-width: 0;
         }
 
         .team-name-rank {
-          font-size: 1.3rem;
+          font-size: 1.4rem;
           font-weight: bold;
-          color: #333;
-          margin-bottom: 0.3rem;
+          color: #2c3e50;
+          margin-bottom: 0.2rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .rank-1 .team-name-rank,
+        .rank-2 .team-name-rank,
+        .rank-3 .team-name-rank {
+          color: #1a1a1a;
         }
 
         .team-members {
-          color: #666;
-          font-size: 0.9rem;
+          color: #7f8c8d;
+          font-size: 0.95rem;
+          display: flex;
+          align-items: center;
+          gap: 0.3rem;
+        }
+
+        .rank-1 .team-members,
+        .rank-2 .team-members,
+        .rank-3 .team-members {
+          color: rgba(0, 0, 0, 0.6);
         }
 
         .team-score-rank {
-          font-size: 2rem;
-          font-weight: bold;
+          font-size: 2.2rem;
+          font-weight: 800;
           color: #667eea;
-          background: rgba(102, 126, 234, 0.1);
-          padding: 0.5rem 1.5rem;
-          border-radius: 10px;
+          background: rgba(102, 126, 234, 0.15);
+          padding: 0.8rem 1.8rem;
+          border-radius: 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 120px;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .rank-1 .team-score-rank,
-        .rank-2 .team-score-rank,
+        .rank-1 .team-score-rank {
+          color: #b8860b;
+          background: rgba(255, 255, 255, 0.6);
+          font-size: 2.5rem;
+        }
+
+        .rank-2 .team-score-rank {
+          color: #696969;
+          background: rgba(255, 255, 255, 0.5);
+          font-size: 2.4rem;
+        }
+
         .rank-3 .team-score-rank {
-          color: #333;
-          background: rgba(255,255,255,0.5);
+          color: #8b4513;
+          background: rgba(255, 255, 255, 0.5);
+          font-size: 2.3rem;
         }
 
         .host-controls {
