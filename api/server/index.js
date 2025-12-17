@@ -8,6 +8,7 @@ import { Server } from "socket.io";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import Papa from "papaparse";
 
 // Load .env from project root (if present). On Railway/Render the platform provides env vars.
 const __filename = fileURLToPath(import.meta.url);
@@ -122,44 +123,38 @@ async function loadQuestionsFromGoogleSheet() {
     }
     const csvText = await response.text();
     
-    // Parse CSV manually (simple parser for server-side)
-    const lines = csvText.split('\n');
-    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+    // Parse CSV using PapaParse (handles quoted values with commas properly)
+    const parseResult = Papa.parse(csvText, {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: (header) => header.trim()
+    });
     
     allQuestions = [];
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (!line) continue;
-      
-      // Simple CSV parse (handle quoted values)
-      const values = [];
-      let current = '';
-      let inQuotes = false;
-      
-      for (let char of line) {
-        if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          values.push(current.trim());
-          current = '';
-        } else {
-          current += char;
+    
+    parseResult.data.forEach((row, index) => {
+      // Normalize column names (handle different naming conventions)
+      const getField = (row, ...names) => {
+        for (const name of names) {
+          const value = row[name];
+          if (value !== undefined && value !== null) {
+            return typeof value === 'string' ? value.trim() : value;
+          }
         }
-      }
-      values.push(current.trim());
+        return '';
+      };
       
-      // Create question object (use 'options' to match client code)
       const question = {
-        id: values[0] || `q${i}`,
-        question: values[1] || '',
+        id: getField(row, 'ID', 'Id', 'id') || `q${index + 1}`,
+        question: getField(row, 'Question'),
         options: [
-          values[2] || '', // OptionA
-          values[3] || '', // OptionB
-          values[4] || '', // OptionC
-          values[5] || ''  // OptionD
+          getField(row, 'OptionA', 'Option A', 'Option_A'),
+          getField(row, 'OptionB', 'Option B', 'Option_B'),
+          getField(row, 'OptionC', 'Option C', 'Option_C'),
+          getField(row, 'OptionD', 'Option D', 'Option_D')
         ],
-        correctAnswer: values[6] || '', // CorrectAnswer column
-        explanation: values[7] || ''
+        correctAnswer: getField(row, 'CorrectAnswer', 'Correct Answer', 'Correct_Answer'),
+        explanation: getField(row, 'Explanation')
       };
       
       // Find correct answer index (A=0, B=1, C=2, D=3)
@@ -172,14 +167,32 @@ async function loadQuestionsFromGoogleSheet() {
       
       question.correctAnswerIndex = correctIndex;
       
-      if (question.question && question.options.some(a => a)) {
+      // Only add valid questions (has question text and at least one option)
+      if (question.question && question.options.some(opt => opt)) {
         allQuestions.push(question);
       }
+    });
+    
+    console.log(`✅ Loaded ${allQuestions.length} questions from Google Sheet`);
+    
+    // Debug: Log headers found in CSV
+    if (parseResult.meta && parseResult.meta.fields) {
+      console.log('CSV Headers found:', parseResult.meta.fields);
     }
     
-    console.log(` Loaded ${allQuestions.length} questions from Google Sheet`);
+    // Debug: Log first question to verify structure
+    if (allQuestions.length > 0) {
+      console.log('Sample question:', {
+        id: allQuestions[0].id,
+        question: allQuestions[0].question.substring(0, 50) + '...',
+        options: allQuestions[0].options.map(o => o ? o.substring(0, 30) + '...' : '(empty)'),
+        correctAnswer: allQuestions[0].correctAnswer,
+        correctAnswerIndex: allQuestions[0].correctAnswerIndex,
+        explanation: allQuestions[0].explanation ? allQuestions[0].explanation.substring(0, 50) + '...' : '(empty)'
+      });
+    }
   } catch (err) {
-    console.error(" Failed to load questions from Google Sheet:", err);
+    console.error("❌ Failed to load questions from Google Sheet:", err);
     allQuestions = [];
   }
 }
@@ -506,16 +519,37 @@ io.on("connection", (socket) => {
       correctAnswer: correctAnswerText
     });
 
-    // Broadcast updated scores to ALL players
-    io.to(gameId).emit("scores-updated", {
-      teams: game.teams.map(t => ({
-        name: t.name,
-        index: t.index,
-        score: t.score,
-        playerCount: t.players.length,
-        players: t.players.map(p => ({ name: p.name, score: p.score }))
-      }))
-    });
+    // Broadcast updated scores to ALL players based on game mode
+    if (game.settings.gameMode === "team") {
+      // Team mode
+      io.to(gameId).emit("scores-updated", {
+        teams: game.teams.map(t => ({
+          name: t.name,
+          index: t.index,
+          score: t.score,
+          playerCount: t.players.length,
+          players: t.players.map(p => {
+            const actualPlayer = game.players.find(gp => gp.id === p.id);
+            return { name: p.name, score: actualPlayer?.score || 0 };
+          })
+        }))
+      });
+    } else {
+      // Individual mode
+      const sortedPlayers = [...game.players]
+        .map(p => ({ name: p.name, score: p.score || 0 }))
+        .sort((a, b) => b.score - a.score);
+      
+      io.to(gameId).emit("scores-updated", {
+        teams: [{
+          name: "Individual",
+          index: 0,
+          score: 0,
+          playerCount: game.players.length,
+          players: sortedPlayers
+        }]
+      });
+    }
 
     
     // NOTE: NO auto-advance here! Each player advances individually on their own client.
@@ -529,32 +563,55 @@ io.on("connection", (socket) => {
     const player = game.players.find(p => p.id === socket.id);
     if (!player) return;
 
-    // Ensure player's final score is recorded (in case some update-score events were lost)
-    // Use the maximum of server-tracked score and client-reported score
+    console.log(`[player-finished] Player ${player.name} finished with finalScore: ${finalScore}, current server score: ${player.score || 0}`);
+
+    // Always update player's score to final score (client is authoritative)
     const serverScore = player.score || 0;
     const clientScore = finalScore || 0;
     
-    if (clientScore > serverScore) {
-      player.score = clientScore;
-      
-      // Also update team score if needed
-      if (teamIndex >= 0 && teamIndex < game.teams.length) {
-        const scoreDiff = clientScore - serverScore;
-        game.teams[teamIndex].score += scoreDiff;
-      }
+    // Update to client's final score (they calculated it correctly)
+    player.score = clientScore;
+    
+    // Also update team score if needed (team mode only)
+    if (game.settings.gameMode === "team" && teamIndex >= 0 && teamIndex < game.teams.length) {
+      const scoreDiff = clientScore - serverScore;
+      game.teams[teamIndex].score += scoreDiff;
     }
 
     
-    // Broadcast updated scores
-    io.to(gameId).emit("scores-updated", {
-      teams: game.teams.map((t, idx) => ({
-        name: t.name,
-        index: idx,
-        score: t.score,
-        playerCount: t.players.length,
-        players: t.players.map(p => ({ name: p.name, score: p.score || 0 }))
-      }))
-    });
+    // Broadcast updated scores based on game mode
+    if (game.settings.gameMode === "team") {
+      // Team mode
+      io.to(gameId).emit("scores-updated", {
+        teams: game.teams.map((t, idx) => ({
+          name: t.name,
+          index: idx,
+          score: t.score,
+          playerCount: t.players.length,
+          players: t.players.map(p => {
+            const actualPlayer = game.players.find(gp => gp.id === p.id);
+            return { name: p.name, score: actualPlayer?.score || 0 };
+          })
+        }))
+      });
+    } else {
+      // Individual mode
+      const sortedPlayers = [...game.players]
+        .map(p => ({ name: p.name, score: p.score || 0 }))
+        .sort((a, b) => b.score - a.score);
+      
+      console.log(`[player-finished] Broadcasting individual mode scores:`, sortedPlayers);
+      
+      io.to(gameId).emit("scores-updated", {
+        teams: [{
+          name: "Individual",
+          index: 0,
+          score: 0,
+          playerCount: game.players.length,
+          players: sortedPlayers
+        }]
+      });
+    }
   });
 
   socket.on("end-game", ({ gameId }) => {

@@ -422,6 +422,12 @@ export const MultiplayerGame: React.FC = () => {
             setTimeout(() => {
               setCountdown(null);
               
+              // Reset all answer-related states before starting
+              setSelectedAnswer(null);
+              setHasAnswered(false);
+              setShowingCorrectAnswer(false);
+              setCorrectAnswerIndex(null);
+              
               // Determine phase based on if I'm host or player
               if (game.host === newSocket.id) {
                 setPhase("host-view");
@@ -504,6 +510,7 @@ export const MultiplayerGame: React.FC = () => {
     });
 
     newSocket.on("scores-updated", ({ teams }) => {
+      console.log("[scores-updated] Received scores:", teams);
       setScores(teams);
       
       // Update gameState.teams to reflect realtime scores
@@ -1103,43 +1110,144 @@ export const MultiplayerGame: React.FC = () => {
     if (!gameState) return null;
 
     const isIndividualMode = gameState.settings.gameMode === "individual";
-    const realtimeScores = [...scores].sort((a, b) => b.score - a.score);
+    
+    // For individual mode, sort players; for team mode, sort teams
+    const realtimeScores = isIndividualMode 
+      ? (() => {
+          // Try to get players from scores first, fallback to gameState.players
+          const playersData = scores[0]?.players && scores[0].players.length > 0
+            ? scores[0].players
+            : gameState.players.map(p => ({ name: p.name, score: p.score || 0 }));
+          
+          return [{ 
+            ...scores[0], 
+            players: [...playersData].sort((a, b) => b.score - a.score) 
+          }];
+        })()
+      : [...scores].sort((a, b) => b.score - a.score);
+    
+    const totalPlayers = gameState.players.length;
+    const progress = ((currentQuestion + 1) / gameState.settings.questionCount) * 100;
 
     return (
       <div className="host-view">
         <div className="host-header">
-          <h2>🎯 Màn Hình Host</h2>
-          <div className="question-counter">
-            Câu {currentQuestion + 1}/{gameState.settings.questionCount}
+          <div className="host-title-section">
+            <h2>🎯 Màn Hình Host</h2>
+            <div className="live-indicator">
+              <span className="live-dot"></span>
+              <span>LIVE</span>
+            </div>
           </div>
+          {/* <div className="host-stats">
+            <div className="stat-item">
+              <span className="stat-icon">👥</span>
+              <span className="stat-value">{totalPlayers}</span>
+              <span className="stat-label">Người chơi</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">❓</span>
+              <span className="stat-value">{currentQuestion + 1}/{gameState.settings.questionCount}</span>
+              <span className="stat-label">Câu hỏi</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">📊</span>
+              <span className="stat-value">{Math.round(progress)}%</span>
+              <span className="stat-label">Tiến độ</span>
+            </div>
+          </div> */}
         </div>
 
-        <div className="leaderboard">
-          <h3>🏆 Bảng Xếp Hạng Trực Tiếp</h3>
-          <div className="teams-ranking">
+        {/* <div className="progress-bar-container">
+          <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+        </div> */}
+
+        <div className="host-leaderboard-container">
+          <div className="leaderboard-header">
+            <h3>🏆 Bảng Xếp Hạng</h3>
+            <div className="live-badge">Cập nhật trực tiếp</div>
+          </div>
+
+          {/* Top 3 Podium */}
+          <div className="podium">
             {isIndividualMode ? (
-              realtimeScores[0]?.players?.map((player, idx) => (
-                <div key={idx} className={`rank-item rank-${idx + 1}`}>
-                  <div className="rank-number">#{idx + 1}</div>
-                  <div className="team-info-rank">
-                    <div className="team-name-rank">👤 {player.name}</div>
+              (realtimeScores[0]?.players && realtimeScores[0].players.length > 0) ? realtimeScores[0].players.slice(0, 3).map((player, idx) => (
+                <div key={idx} className={`podium-place place-${idx + 1}`}>
+                  <div className="medal">
+                    {idx === 0 && '🥇'}
+                    {idx === 1 && '🥈'}
+                    {idx === 2 && '🥉'}
                   </div>
-                  <div className="team-score-rank">{player.score}</div>
+                  <div className="team-info">
+                    <h3>👤 {player.name}</h3>
+                    <p className="score">{player.score} điểm</p>
+                  </div>
                 </div>
-              ))
+              )) : null
             ) : (
-              realtimeScores.map((team, idx) => (
-                <div key={team.index} className={`rank-item rank-${idx + 1}`}>
-                  <div className="rank-number">#{idx + 1}</div>
-                  <div className="team-info-rank">
-                    <div className="team-name-rank">{team.name}</div>
-                    <div className="team-members">{team.playerCount} thành viên</div>
+              realtimeScores.slice(0, 3).map((team, idx) => (
+                <div key={team.index} className={`podium-place place-${idx + 1}`}>
+                  <div className="medal">
+                    {idx === 0 && '🥇'}
+                    {idx === 1 && '🥈'}
+                    {idx === 2 && '🥉'}
                   </div>
-                  <div className="team-score-rank">{team.score}</div>
+                  <div className="team-info">
+                    <h3>{team.name}</h3>
+                    <p className="score">{team.score} điểm</p>
+                    <p className="members">👥 {team.playerCount} thành viên</p>
+                    {team.players && team.players.length > 0 && (
+                      <div className="podium-players">
+                        {team.players.map((p, pIdx) => (
+                          <span key={pIdx} className="podium-player">
+                            {p.name}: <strong>{p.score}đ</strong>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))
             )}
           </div>
+
+          {/* Remaining Rankings */}
+          {((isIndividualMode && realtimeScores[0]?.players?.length > 3) || 
+            (!isIndividualMode && realtimeScores.length > 3)) && (
+            <div className="full-rankings">
+              <h3>Xếp Hạng Còn Lại</h3>
+              {isIndividualMode ? (
+                (realtimeScores[0]?.players && realtimeScores[0].players.length > 3) ? realtimeScores[0].players.slice(3).map((player, idx) => (
+                  <div key={idx} className="ranking-item">
+                    <div className="ranking-header">
+                      <span className="rank">#{idx + 4}</span>
+                      <span className="team-name">👤 {player.name}</span>
+                      <span className="team-score">{player.score} điểm</span>
+                    </div>
+                  </div>
+                )) : null
+              ) : (
+                realtimeScores.slice(3).map((team, idx) => (
+                  <div key={team.index} className="ranking-item">
+                    <div className="ranking-header">
+                      <span className="rank">#{idx + 4}</span>
+                      <span className="team-name">{team.name}</span>
+                      <span className="team-score">{team.score} điểm</span>
+                    </div>
+                    {team.players && team.players.length > 0 && (
+                      <div className="ranking-players">
+                        {team.players.map((p, pIdx) => (
+                          <span key={pIdx} className="ranking-player">
+                            {p.name}: {p.score}đ
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
 
         <div className="host-controls">
@@ -1158,7 +1266,21 @@ export const MultiplayerGame: React.FC = () => {
     if (!gameState) return null;
 
     const isIndividualMode = gameState.settings.gameMode === "individual";
-    const sortedScores = [...scores].sort((a, b) => b.score - a.score);
+    
+    // For individual mode, sort players; for team mode, sort teams
+    const sortedScores = isIndividualMode 
+      ? (() => {
+          // Try to get players from scores first, fallback to gameState.players
+          const playersData = scores[0]?.players && scores[0].players.length > 0
+            ? scores[0].players
+            : gameState.players.map(p => ({ name: p.name, score: p.score || 0 }));
+          
+          return [{ 
+            ...scores[0], 
+            players: [...playersData].sort((a, b) => b.score - a.score) 
+          }];
+        })()
+      : [...scores].sort((a, b) => b.score - a.score);
 
     return (
       <div className="waiting-results">
@@ -1174,41 +1296,103 @@ export const MultiplayerGame: React.FC = () => {
           </div>
         </div>
 
-        <div className="leaderboard">
-          <h3>🏆 Bảng Xếp Hạng Trực Tiếp</h3>
-          <div className="teams-ranking">
-            {isIndividualMode ? (
-              sortedScores[0]?.players?.map((player, idx) => (
-                <div 
-                  key={idx} 
-                  className={`rank-item rank-${idx + 1} ${player.name === playerName ? 'my-team-highlight' : ''}`}
-                >
-                  <div className="rank-number">#{idx + 1}</div>
-                  <div className="team-info-rank">
-                    <div className="team-name-rank">👤 {player.name}</div>
-                  </div>
-                  <div className="team-score-rank">{player.score}</div>
-                </div>
-              ))
-            ) : (
-              sortedScores.map((team, idx) => (
-                <div 
-                  key={team.index} 
-                  className={`rank-item rank-${idx + 1} ${team.index === myTeamIndex ? 'my-team-highlight' : ''}`}
-                >
-                  <div className="rank-number">#{idx + 1}</div>
-                  <div className="team-info-rank">
-                    <div className="team-name-rank">
-                      {team.name}
-                      {team.index === myTeamIndex && ' ⭐'}
-                    </div>
-                    <div className="team-members">{team.playerCount} thành viên</div>
-                  </div>
-                  <div className="team-score-rank">{team.score}</div>
-                </div>
-              ))
-            )}
+        <div className="player-leaderboard-container">
+          <div className="leaderboard-header">
+            <h3>🏆 Bảng Xếp Hạng</h3>
+            <div className="live-badge">Cập nhật trực tiếp</div>
           </div>
+
+          {/* Top 3 Podium */}
+          {isIndividualMode ? (
+            sortedScores[0]?.players && sortedScores[0].players.length > 0 && (
+              <>
+                <div className="podium">
+                  {sortedScores[0].players.slice(0, 3).map((player, idx) => (
+                    <div key={idx} className={`podium-place place-${idx + 1} ${player.name === playerName ? 'my-highlight' : ''}`}>
+                      <div className="medal">
+                        {idx === 0 && '🥇'}
+                        {idx === 1 && '🥈'}
+                        {idx === 2 && '🥉'}
+                      </div>
+                      <div className="team-info">
+                        <h3>👤 {player.name}</h3>
+                        <p className="score">{player.score} điểm</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Remaining Rankings */}
+                {sortedScores[0].players.length > 3 && (
+                  <div className="full-rankings">
+                    <h3>Xếp Hạng Còn Lại</h3>
+                    {sortedScores[0].players.slice(3).map((player, idx) => (
+                      <div key={idx} className={`ranking-item ${player.name === playerName ? 'my-highlight' : ''}`}>
+                        <div className="ranking-header">
+                          <span className="rank">#{idx + 4}</span>
+                          <span className="team-name">👤 {player.name}</span>
+                          <span className="team-score">{player.score} điểm</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )
+          ) : (
+            <>
+              <div className="podium">
+                {sortedScores.slice(0, 3).map((team, idx) => (
+                  <div key={team.index} className={`podium-place place-${idx + 1} ${team.index === myTeamIndex ? 'my-highlight' : ''}`}>
+                    <div className="medal">
+                      {idx === 0 && '🥇'}
+                      {idx === 1 && '🥈'}
+                      {idx === 2 && '🥉'}
+                    </div>
+                    <div className="team-info">
+                      <h3>{team.name}</h3>
+                      <p className="score">{team.score} điểm</p>
+                      <p className="members">👥 {team.playerCount} thành viên</p>
+                      {team.players && team.players.length > 0 && (
+                        <div className="podium-players">
+                          {team.players.map((p, pIdx) => (
+                            <span key={pIdx} className="podium-player">
+                              {p.name}: <strong>{p.score}đ</strong>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Remaining Rankings */}
+              {sortedScores.length > 3 && (
+                <div className="full-rankings">
+                  <h3>Xếp Hạng Còn Lại</h3>
+                  {sortedScores.slice(3).map((team, idx) => (
+                    <div key={team.index} className={`ranking-item ${team.index === myTeamIndex ? 'my-highlight' : ''}`}>
+                      <div className="ranking-header">
+                        <span className="rank">#{idx + 4}</span>
+                        <span className="team-name">{team.name}</span>
+                        <span className="team-score">{team.score} điểm</span>
+                      </div>
+                      {team.players && team.players.length > 0 && (
+                        <div className="ranking-players">
+                          {team.players.map((p, pIdx) => (
+                            <span key={pIdx} className="ranking-player">
+                              {p.name}: {p.score}đ
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     );
@@ -1222,6 +1406,13 @@ export const MultiplayerGame: React.FC = () => {
     if (!question) return null;
 
     const shuffledQ = getShuffledQuestion(question);
+    
+    // Safety check: ensure options array exists and has content
+    if (!shuffledQ.options || shuffledQ.options.length === 0) {
+      console.error("Invalid question - no options:", shuffledQ);
+      return <div className="error-message">Câu hỏi không hợp lệ. Vui lòng liên hệ host.</div>;
+    }
+    
     const isIndividualMode = gameState?.settings?.gameMode === "individual";
     const myTeam = !isIndividualMode ? gameState.teams[myTeamIndex] : null;
 
@@ -1251,18 +1442,35 @@ export const MultiplayerGame: React.FC = () => {
           </span>
         </div>
 
-        {!isIndividualMode && myTeam && (
-          <div className="team-players-list">
-            <h4>👥 Thành viên:</h4>
-            <div className="teammates">
-              {myTeam.players.map((player, idx) => (
-                <span key={idx} className={`teammate ${player.name === playerName ? 'me' : ''}`}>
-                  {player.name === playerName && '⭐ '}
-                  {player.name}
-                </span>
-              ))}
-            </div>
+        {isIndividualMode ? (
+          <div className="mini-leaderboard">
+            {/* <h4>🏆 Bảng Xếp Hạng</h4>
+            <div className="mini-rankings">
+              {(scores[0]?.players && scores[0].players.length > 0) && 
+                [...scores[0].players].sort((a, b) => b.score - a.score).slice(0, 5).map((player, idx) => (
+                  <div key={idx} className={`mini-rank-item ${player.name === playerName ? 'highlight' : ''}`}>
+                    <span className="mini-rank">#{idx + 1}</span>
+                    <span className="mini-name">{player.name}</span>
+                    <span className="mini-score">{player.score}đ</span>
+                  </div>
+                ))
+              }
+            </div> */}
           </div>
+        ) : (
+          myTeam && (
+            <div className="team-players-list">
+              <h4>👥 Thành viên:</h4>
+              <div className="teammates">
+                {myTeam.players.map((player, idx) => (
+                  <span key={idx} className={`teammate ${player.name === playerName ? 'me' : ''}`}>
+                    {player.name === playerName && '⭐ '}
+                    {player.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )
         )}
 
         <div className={`question-container ${questionTransition ? 'fade-out' : 'fade-in'}`}>
@@ -1876,7 +2084,7 @@ export const MultiplayerGame: React.FC = () => {
         .question-number {
           font-size: 1.2rem;
           font-weight: bold;
-          color: #fbfcffff;
+          color: #b8860b;
         }
 
         .timer {
@@ -2611,7 +2819,11 @@ export const MultiplayerGame: React.FC = () => {
 
         /* Compact UI styles */
         .game-header {
-          padding: 0.8rem 1.5rem;
+          padding: 1.2rem 1.8rem;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 15px;
+          margin-bottom: 1.5rem;
+          box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
         }
 
         .question-container {
@@ -2808,33 +3020,163 @@ export const MultiplayerGame: React.FC = () => {
 
         /* Host View Styles */
         .host-view {
-          max-width: 1200px;
+          max-width: 1400px;
           margin: 0 auto;
+          padding: 1.5rem;
         }
 
         .host-header {
-          background: white;
-          padding: 1.5rem;
-          border-radius: 15px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          padding: 2rem 2.5rem;
+          border-radius: 25px;
+          margin-bottom: 1.5rem;
+          box-shadow: 0 15px 40px rgba(102, 126, 234, 0.35);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .host-header::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="white" opacity="0.05"/></svg>');
+          background-size: 150px 150px;
+          opacity: 0.3;
+          pointer-events: none;
+        }
+
+        .host-title-section {
           display: flex;
-          justify-content: space-between;
           align-items: center;
-          margin-bottom: 2rem;
-          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+          gap: 1.5rem;
+          margin-bottom: 1.5rem;
+          position: relative;
+          z-index: 1;
         }
 
         .host-header h2 {
-          color: #667eea;
+          color: white;
           margin: 0;
+          font-size: 2.2rem;
+          font-weight: 800;
+          text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .question-counter {
-          background: #b8860b;
+        .live-indicator {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: rgba(255, 255, 255, 0.2);
+          padding: 0.5rem 1rem;
+          border-radius: 20px;
           color: white;
-          padding: 0.8rem 1.5rem;
+          font-weight: 700;
+          font-size: 0.9rem;
+          backdrop-filter: blur(10px);
+          border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .live-dot {
+          width: 10px;
+          height: 10px;
+          background: #ff4444;
+          border-radius: 50%;
+          animation: livePulse 1.5s ease-in-out infinite;
+          box-shadow: 0 0 10px #ff4444;
+        }
+
+        @keyframes livePulse {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.5;
+            transform: scale(1.2);
+          }
+        }
+
+        .host-stats {
+          display: flex;
+          gap: 2rem;
+          position: relative;
+          z-index: 1;
+        }
+
+        .stat-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.3rem;
+          background: rgba(255, 255, 255, 0.15);
+          padding: 1rem 1.5rem;
+          border-radius: 15px;
+          backdrop-filter: blur(10px);
+          border: 2px solid rgba(255, 255, 255, 0.25);
+          transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+          transform: translateY(-3px);
+          background: rgba(255, 255, 255, 0.25);
+        }
+
+        .stat-icon {
+          font-size: 1.8rem;
+        }
+
+        .stat-value {
+          color: white;
+          font-size: 1.5rem;
+          font-weight: 800;
+          text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-label {
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 0.85rem;
+          font-weight: 600;
+        }
+
+        .progress-bar-container {
+          background: rgba(255, 255, 255, 0.1);
+          height: 8px;
           border-radius: 10px;
-          font-weight: bold;
-          font-size: 1.1rem;
+          overflow: hidden;
+          margin-bottom: 2rem;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+          height: 100%;
+          background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+          border-radius: 10px;
+          transition: width 0.5s ease;
+          box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+          position: relative;
+        }
+
+        .progress-bar::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+          animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
         }
 
         .current-question-display {
@@ -3080,6 +3422,227 @@ export const MultiplayerGame: React.FC = () => {
           background: rgba(255, 255, 255, 0.25) !important;
         }
 
+        /* Player Leaderboard in Waiting Results - Same style as Host View */
+        .player-leaderboard-container {
+          background: white;
+          padding: 2.5rem;
+          border-radius: 25px;
+          box-shadow: 0 15px 50px rgba(102, 126, 234, 0.15);
+          border: 3px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .player-leaderboard-container .leaderboard-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 2.5rem;
+          padding-bottom: 1rem;
+          border-bottom: 3px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .player-leaderboard-container .leaderboard-header h3 {
+          color: #667eea;
+          margin: 0;
+          font-size: 2rem;
+          font-weight: 800;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .player-leaderboard-container .podium {
+          display: flex;
+          justify-content: center;
+          align-items: flex-end;
+          gap: 1.5rem;
+          margin-bottom: 3rem;
+          padding: 2rem 0;
+        }
+
+        .player-leaderboard-container .podium-place {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 2rem 1.5rem;
+          border-radius: 20px;
+          background: white;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .player-leaderboard-container .podium-place::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 5px;
+        }
+
+        .player-leaderboard-container .place-1 {
+          order: 2;
+          transform: translateY(-20px) scale(1.1);
+          z-index: 3;
+        }
+
+        .player-leaderboard-container .place-1::before {
+          background: linear-gradient(90deg, #ffd700, #ffed4e);
+        }
+
+        .player-leaderboard-container .place-2 {
+          order: 1;
+          transform: translateY(-10px);
+          z-index: 2;
+        }
+
+        .player-leaderboard-container .place-2::before {
+          background: linear-gradient(90deg, #c0c0c0, #e8e8e8);
+        }
+
+        .player-leaderboard-container .place-3 {
+          order: 3;
+          z-index: 1;
+        }
+
+        .player-leaderboard-container .place-3::before {
+          background: linear-gradient(90deg, #cd7f32, #e8a87c);
+        }
+
+        .player-leaderboard-container .medal {
+          font-size: 4rem;
+          margin-bottom: 1rem;
+          animation: bounce 2s infinite;
+        }
+
+        .player-leaderboard-container .team-info {
+          text-align: center;
+        }
+
+        .player-leaderboard-container .team-info h3 {
+          color: #2c3e50;
+          margin: 0 0 0.5rem 0;
+          font-size: 1.3rem;
+        }
+
+        .player-leaderboard-container .team-info .score {
+          color: #667eea;
+          font-size: 2rem;
+          font-weight: bold;
+          margin: 0.5rem 0;
+        }
+
+        .player-leaderboard-container .team-info .members {
+          color: #7f8c8d;
+          font-size: 0.9rem;
+          margin: 0.3rem 0 0 0;
+        }
+
+        .player-leaderboard-container .full-rankings {
+          margin-top: 2rem;
+          padding-top: 2rem;
+          border-top: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .player-leaderboard-container .full-rankings h3 {
+          color: #667eea;
+          text-align: center;
+          margin-bottom: 1.5rem;
+          font-size: 1.5rem;
+        }
+
+        .player-leaderboard-container .ranking-item {
+          background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+          padding: 1.2rem 1.5rem;
+          border-radius: 15px;
+          margin-bottom: 1rem;
+          box-shadow: 0 5px 15px rgba(102, 126, 234, 0.08);
+          border: 2px solid rgba(102, 126, 234, 0.1);
+          transition: all 0.3s ease;
+        }
+
+        .player-leaderboard-container .ranking-item:hover {
+          transform: translateX(5px);
+          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .player-leaderboard-container .ranking-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .player-leaderboard-container .rank {
+          font-size: 1.3rem;
+          font-weight: 800;
+          color: #667eea;
+          min-width: 60px;
+        }
+
+        .player-leaderboard-container .team-name {
+          flex: 1;
+          font-weight: 700;
+          color: #2c3e50;
+          font-size: 1.1rem;
+        }
+
+        .player-leaderboard-container .team-score {
+          font-size: 1.3rem;
+          font-weight: 800;
+          color: #667eea;
+          background: rgba(102, 126, 234, 0.1);
+          padding: 0.5rem 1rem;
+          border-radius: 10px;
+        }
+
+        .player-leaderboard-container .ranking-players {
+          margin-top: 0.8rem;
+          padding-top: 0.8rem;
+          border-top: 2px solid rgba(102, 126, 234, 0.1);
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.6rem;
+        }
+
+        .player-leaderboard-container .ranking-player {
+          font-size: 0.85rem;
+          color: #64748b;
+          padding: 0.4rem 0.8rem;
+          background: rgba(102, 126, 234, 0.08);
+          border-radius: 8px;
+        }
+
+        .player-leaderboard-container .my-highlight {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+          border: 3px solid #5568d3 !important;
+          box-shadow: 0 12px 40px rgba(102, 126, 234, 0.5) !important;
+          transform: scale(1.05);
+        }
+
+        .player-leaderboard-container .my-highlight .team-info h3,
+        .player-leaderboard-container .my-highlight .team-info .score,
+        .player-leaderboard-container .my-highlight .team-info .members,
+        .player-leaderboard-container .my-highlight .rank,
+        .player-leaderboard-container .my-highlight .team-name {
+          color: white !important;
+        }
+
+        .player-leaderboard-container .my-highlight .team-score {
+          color: white !important;
+          background: rgba(255, 255, 255, 0.25) !important;
+        }
+
+        .player-leaderboard-container .my-highlight .podium-player,
+        .player-leaderboard-container .my-highlight .ranking-player {
+          background: rgba(255, 255, 255, 0.2) !important;
+          color: white !important;
+        }
+
+        .player-leaderboard-container .my-highlight .podium-player strong {
+          color: white !important;
+        }
+
         .rank-3 {
           background: linear-gradient(135deg, #cd7f32 0%, #e8b27f 100%);
         }
@@ -3190,62 +3753,321 @@ export const MultiplayerGame: React.FC = () => {
 
         .host-controls {
           text-align: center;
+          margin-top: 2rem;
         }
 
-        /* Player View Updates */
-        .team-badge {
+        .host-controls .primary-button {
+          background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+          color: white;
+          border: none;
+          padding: 1.2rem 3rem;
+          border-radius: 15px;
+          font-size: 1.3rem;
+          font-weight: bold;
+          cursor: pointer;
+          box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+          transition: all 0.3s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .host-controls .primary-button:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 12px 35px rgba(255, 107, 107, 0.5);
+        }
+
+        .host-controls .primary-button:active {
+          transform: translateY(-1px);
+        }
+
+        /* Host View Leaderboard - Same as Results */
+        .host-leaderboard-container {
           background: white;
-          padding: 0.8rem 1.5rem;
-          border-radius: 10px;
+          padding: 2.5rem;
+          border-radius: 25px;
+          margin-bottom: 2rem;
+          box-shadow: 0 15px 50px rgba(102, 126, 234, 0.15);
+          border: 3px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .host-view .leaderboard-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 2.5rem;
+          padding-bottom: 1rem;
+          border-bottom: 3px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .host-view .leaderboard-header h3 {
+          color: #667eea;
+          margin: 0;
+          font-size: 2rem;
+          font-weight: 800;
           display: flex;
           align-items: center;
           gap: 0.5rem;
         }
 
-        .team-label {
-          color: #666;
+        .live-badge {
+          background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+          color: white;
+          padding: 0.5rem 1.2rem;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3);
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        .live-badge::before {
+          content: '●';
+          color: white;
+          animation: blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+
+        @keyframes pulse {
+          0%, 100% {
+            box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3);
+          }
+          50% {
+            box-shadow: 0 4px 25px rgba(74, 222, 128, 0.5);
+          }
+        }
+
+        /* Host View uses same podium and rankings as results */
+        .host-view .podium {
+          display: flex;
+          justify-content: center;
+          align-items: flex-end;
+          gap: 1.5rem;
+          margin-bottom: 3rem;
+          padding: 2rem 0;
+        }
+
+        .host-view .podium-place {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 2rem 1.5rem;
+          border-radius: 20px;
+          background: white;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .host-view .podium-place::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 5px;
+        }
+
+        .host-view .place-1 {
+          order: 2;
+          transform: translateY(-20px) scale(1.1);
+          z-index: 3;
+        }
+
+        .host-view .place-1::before {
+          background: linear-gradient(90deg, #ffd700, #ffed4e);
+        }
+
+        .host-view .place-2 {
+          order: 1;
+          transform: translateY(-10px);
+          z-index: 2;
+        }
+
+        .host-view .place-2::before {
+          background: linear-gradient(90deg, #c0c0c0, #e8e8e8);
+        }
+
+        .host-view .place-3 {
+          order: 3;
+          z-index: 1;
+        }
+
+        .host-view .place-3::before {
+          background: linear-gradient(90deg, #cd7f32, #e8a87c);
+        }
+
+        .host-view .medal {
+          font-size: 4rem;
+          margin-bottom: 1rem;
+          animation: bounce 2s infinite;
+        }
+
+        .host-view .team-info {
+          text-align: center;
+        }
+
+        .host-view .team-info h3 {
+          color: #2c3e50;
+          margin: 0 0 0.5rem 0;
+          font-size: 1.3rem;
+        }
+
+        .host-view .team-info .score {
+          color: #667eea;
+          font-size: 2rem;
+          font-weight: bold;
+          margin: 0.5rem 0;
+        }
+
+        .host-view .team-info .members {
+          color: #7f8c8d;
           font-size: 0.9rem;
+          margin: 0.3rem 0 0 0;
+        }
+
+        .podium-players {
+          margin-top: 1rem;
+          padding-top: 0.8rem;
+          border-top: 2px solid rgba(102, 126, 234, 0.1);
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          max-width: 200px;
+        }
+
+        .podium-player {
+          font-size: 0.85rem;
+          color: #64748b;
+          padding: 0.4rem 0.6rem;
+          background: rgba(102, 126, 234, 0.08);
+          border-radius: 8px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .podium-player strong {
+          color: #667eea;
+          font-weight: 700;
+        }
+
+        .host-view .full-rankings {
+          margin-top: 2rem;
+          padding-top: 2rem;
+          border-top: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .host-view .full-rankings h3 {
+          color: #667eea;
+          text-align: center;
+          margin-bottom: 1.5rem;
+          font-size: 1.5rem;
+        }
+
+        /* Player View Updates */
+        .team-badge {
+          background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+          padding: 1rem 1.8rem;
+          border-radius: 15px;
+          display: flex;
+          align-items: center;
+          gap: 0.8rem;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+          border: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .team-label {
+          color: #7f8c8d;
+          font-size: 0.95rem;
+          font-weight: 500;
         }
 
         .team-name-badge {
           color: #667eea;
-          font-weight: bold;
-          font-size: 1.1rem;
+          font-weight: 800;
+          font-size: 1.2rem;
+          text-shadow: 0 1px 2px rgba(102, 126, 234, 0.1);
         }
 
         .my-score-badge {
           background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-          color: #333;
-          padding: 0.3rem 0.8rem;
+          color: #1a1a1a;
+          padding: 0.5rem 1.2rem;
           border-radius: 20px;
-          font-weight: bold;
-          font-size: 0.9rem;
-          margin-left: 0.5rem;
+          font-weight: 800;
+          font-size: 1.1rem;
+          margin-left: 0.8rem;
+          box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+          border: 2px solid rgba(255, 215, 0, 0.4);
+          display: flex;
+          align-items: center;
+          gap: 0.3rem;
+        }
+
+        .my-score-badge::before {
+          content: '⭐';
+          font-size: 1rem;
         }
 
         .question-info-bar {
           text-align: center;
-          margin-bottom: 1rem;
+          margin-bottom: 1.5rem;
         }
 
         .team-players-list {
-          background: white;
-          padding: 1rem;
-          border-radius: 10px;
-          margin-bottom: 1rem;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+          padding: 1.3rem 1.5rem;
+          border-radius: 15px;
+          margin-bottom: 1.5rem;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.12);
+          border: 2px solid rgba(102, 126, 234, 0.1);
         }
 
         .team-players-list h4 {
-          margin: 0 0 0.5rem 0;
+          margin: 0 0 0.8rem 0;
           color: #667eea;
-          font-size: 0.9rem;
+          font-size: 1rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .team-players-list h4::before {
+          content: '👥';
+          font-size: 1.1rem;
         }
 
         .teammates {
           display: flex;
           flex-wrap: wrap;
-          gap: 0.5rem;
+          gap: 0.8rem;
+        }
+
+        .teammates li {
+          background: white;
+          padding: 0.6rem 1rem;
+          border-radius: 10px;
+          color: #2c3e50;
+          font-weight: 600;
+          font-size: 0.95rem;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          border: 1px solid rgba(102, 126, 234, 0.15);
+          transition: all 0.2s ease;
+        }
+
+        .teammates li:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
         }
 
         .teammate {
@@ -3259,6 +4081,91 @@ export const MultiplayerGame: React.FC = () => {
         .teammate.me {
           background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
           font-weight: bold;
+        }
+
+        /* Mini Leaderboard for Individual Mode */
+        .mini-leaderboard {
+          background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+          padding: 1rem 1.5rem;
+          border-radius: 15px;
+          margin-bottom: 1.5rem;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.12);
+          border: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .mini-leaderboard h4 {
+          margin: 0 0 1rem 0;
+          color: #667eea;
+          font-size: 1rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .mini-rankings {
+          display: flex;
+          flex-direction: column;
+          gap: 0.6rem;
+        }
+
+        .mini-rank-item {
+          display: flex;
+          align-items: center;
+          gap: 0.8rem;
+          padding: 0.6rem 1rem;
+          background: white;
+          border-radius: 10px;
+          border: 2px solid transparent;
+          transition: all 0.2s ease;
+        }
+
+        .mini-rank-item:hover {
+          border-color: #667eea;
+          transform: translateX(3px);
+        }
+
+        .mini-rank-item.highlight {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border-color: #667eea;
+          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .mini-rank {
+          font-size: 1rem;
+          font-weight: 800;
+          color: #667eea;
+          min-width: 35px;
+        }
+
+        .mini-rank-item.highlight .mini-rank {
+          color: white;
+        }
+
+        .mini-name {
+          flex: 1;
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 0.95rem;
+        }
+
+        .mini-rank-item.highlight .mini-name {
+          color: white;
+        }
+
+        .mini-score {
+          font-weight: 800;
+          color: #667eea;
+          font-size: 1.1rem;
+          background: rgba(102, 126, 234, 0.1);
+          padding: 0.3rem 0.8rem;
+          border-radius: 8px;
+        }
+
+        .mini-rank-item.highlight .mini-score {
+          background: rgba(255, 255, 255, 0.25);
+          color: white;
         }
 
         .mini-scoreboard {
