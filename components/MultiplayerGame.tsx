@@ -1036,21 +1036,15 @@ export const MultiplayerGame: React.FC = () => {
 
         <div className="lobby-stats">
           <div className="stat-card">
-            <div className="stat-icon">👥</div>
-            <div className="stat-value">{gameState.players.length}</div>
-            <div className="stat-label">Người chơi</div>
+            <div><span className="stat-icon">👥 </span><span className="stat-value">{gameState.players.length}</span> <span className="stat-label"> Người chơi</span></div>
           </div>
           {gameState.settings.gameMode === "team" && (
             <div className="stat-card">
-              <div className="stat-icon">🏆</div>
-              <div className="stat-value">{gameState.settings.teamCount}</div>
-              <div className="stat-label">Nhóm</div>
+              <div><span className="stat-icon">🏆 </span><span className="stat-value">{gameState.settings.teamCount}</span><span className="stat-label"> Nhóm</span></div>
             </div>
           )}
           <div className="stat-card">
-            <div className="stat-icon">❓</div>
-            <div className="stat-value">{gameState.settings.questionCount}</div>
-            <div className="stat-label">Câu hỏi</div>
+            <div><span className="stat-icon">❓ </span><span className="stat-value">{gameState.settings.questionCount}</span> <span className="stat-label"> Câu hỏi</span></div>
           </div>
         </div>
 
@@ -1858,7 +1852,7 @@ export const MultiplayerGame: React.FC = () => {
           font-size: 1.2rem;
           text-align: center;
           padding: 1rem;
-          background: rgba(255,255,255,0.2);
+          background: #b8860b;
           border-radius: 10px;
           display: inline-block;
         }
@@ -2771,8 +2765,8 @@ export const MultiplayerGame: React.FC = () => {
         }
 
         .players-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          display: flex;
+          flex-wrap: wrap;
           gap: 1rem;
         }
 
@@ -2783,6 +2777,8 @@ export const MultiplayerGame: React.FC = () => {
           display: flex;
           align-items: center;
           gap: 0.8rem;
+          min-width: 150px;
+          flex: 0 0 auto;
         }
 
         .player-avatar {
